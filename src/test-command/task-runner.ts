@@ -4,6 +4,7 @@ import { Command, CommandRunner } from 'nest-commander';
 @Command({
   name: 'my-exec',
   arguments: '<task>',
+  description: 'Example of a command',
 })
 export class TaskRunner extends CommandRunner {
   private readonly logger: Logger = new Logger(TaskRunner.name);

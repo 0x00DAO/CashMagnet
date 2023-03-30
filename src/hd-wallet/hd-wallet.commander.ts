@@ -8,6 +8,7 @@ import { HdWalletCreateCommander } from './hd-wallet-create.commander';
   arguments: '<task>',
   subCommands: [HdWalletCreateCommander, HdWalletCreatePathCommander],
   options: { isDefault: true },
+  description: 'HD Wallet Commands',
 })
 export class HdWalletCommander extends CommandRunner {
   private readonly logger: Logger = new Logger(HdWalletCommander.name);
