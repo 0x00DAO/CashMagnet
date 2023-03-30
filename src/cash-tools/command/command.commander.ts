@@ -6,6 +6,7 @@ import { Command, CommandRunner } from 'nest-commander';
   arguments: '<task>',
   subCommands: [],
   options: { isDefault: false },
+  description: 'Cash Tools',
 })
 export class CommandCommander extends CommandRunner {
   private readonly logger: Logger = new Logger(CommandCommander.name);
