@@ -1,19 +1,33 @@
 import { Inject, Logger } from '@nestjs/common';
-import { CommandRunner, SubCommand } from 'nest-commander';
+import { CommandRunner, Option, SubCommand } from 'nest-commander';
 import { WalletService } from '../../ether-wallet/wallet/wallet.service';
 
-@SubCommand({ name: 'balance', arguments: '<address>', argsDescription: {} })
+@SubCommand({ name: 'balance', arguments: '<address>' })
 export class CommandGetBalanceCommander extends CommandRunner {
   @Inject()
   private readonly walletService: WalletService;
 
+  @Option({
+    flags: '-r, --rpc-url <url>',
+    defaultValue: 'https://testnet.era.zksync.dev',
+    description: 'RPC URL eg: https://testnet.era.zksync.dev',
+  })
+  parseRpcUrl(url: string) {
+    if (url) {
+      return url;
+    }
+    return 'https://testnet.era.zksync.dev';
+  }
+
   private readonly logger: Logger = new Logger(CommandGetBalanceCommander.name);
   async run(inputs: string[], options: Record<string, any>): Promise<void> {
     const address = inputs[0];
-    const provider = this.walletService.getProvider(
-      'https://testnet.era.zksync.dev'
-    );
+    this.logger.debug(JSON.stringify(options));
+    const rpcUrl = options.rpcUrl;
+    const provider = this.walletService.getProvider(rpcUrl);
     const balance = await provider.getBalance(address);
-    this.logger.log(`address:${address}, balance: ${balance.toString()}`);
+    console.log(
+      `address:${address}, balance: ${balance.toString()}, rpcUrl: ${rpcUrl}`
+    );
   }
 }
