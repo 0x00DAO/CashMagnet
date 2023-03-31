@@ -2,7 +2,11 @@ import { Inject, Logger } from '@nestjs/common';
 import { CommandRunner, Option, SubCommand } from 'nest-commander';
 import { WalletService } from '../../ether-wallet/wallet/wallet.service';
 
-@SubCommand({ name: 'balance', arguments: '<address>' })
+@SubCommand({
+  name: 'balance',
+  arguments: '<address>',
+  description: 'query address balance',
+})
 export class CommandGetBalanceCommander extends CommandRunner {
   @Inject()
   private readonly walletService: WalletService;
