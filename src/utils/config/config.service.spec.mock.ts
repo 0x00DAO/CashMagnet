@@ -6,7 +6,7 @@ description: Configuration for Cash Magnet
 providers:
   # Common mainnet configuration
   mainnet:
-    type: zkSyncEra
+    name: zkSyncEra
     network: mainnet
     rpcUrl: https://mainnet.era.zksync.io
     chainId: 324
@@ -15,7 +15,7 @@ providers:
     webSocketUrl: wss://mainnet.era.zksync.io/ws
   # Common testnet configuration
   testnet:
-    type: zkSyncEra
+    name: zkSyncEra
     network: testnet
     rpcUrl: https://testnet.era.zksync.dev
     chainId: 280
@@ -24,7 +24,7 @@ providers:
     webSocketUrl: wss://testnet.era.zksync.dev/ws
   # zkSync Mainnet
   zkSyncEra-MainNet:
-    type: zkSyncEra
+    name: zkSyncEra
     network: mainnet
     rpcUrl: https://mainnet.era.zksync.io
     chainId: 324
@@ -33,7 +33,7 @@ providers:
     webSocketUrl: wss://mainnet.era.zksync.io/ws
   # zkSync Testnet
   zkSyncEra-TesNet:
-    type: zkSyncEra
+    name: zkSyncEra
     network: testnet
     rpcUrl: https://testnet.era.zksync.dev
     chainId: 280

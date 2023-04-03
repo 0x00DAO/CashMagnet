@@ -34,4 +34,10 @@ describe('CommandGetBalanceCommander', () => {
   it('should be defined', () => {
     expect(provider).toBeDefined();
   });
+
+  it('should be getNetwork', async () => {
+    const result = provider.getNetwork('mainnet');
+    expect(result).toBeDefined();
+    expect(result).toHaveProperty('rpcUrl');
+  });
 });
