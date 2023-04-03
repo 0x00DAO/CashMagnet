@@ -1,7 +1,9 @@
 import { TestingModule } from '@nestjs/testing';
+import { ethers } from 'ethers';
 import { CommandTestFactory } from 'nest-commander-testing';
+import { WalletService } from '../../ether-wallet/wallet/wallet.service';
+import { configServiceMock } from '../../utils/config/config.service.spec.mock';
 import { CommandGetBalanceCommander } from './command-get-balance.commander';
-import { CommandModule } from './command.module';
 
 describe('CommandGetBalanceCommander', () => {
   let module: TestingModule;
@@ -9,7 +11,19 @@ describe('CommandGetBalanceCommander', () => {
 
   beforeEach(async () => {
     module = await CommandTestFactory.createTestingCommand({
-      imports: [CommandModule],
+      imports: [],
+      providers: [
+        CommandGetBalanceCommander,
+        configServiceMock,
+        {
+          provide: WalletService,
+          useValue: {
+            getProvider: jest.fn().mockImplementation((rpcUrl: string) => {
+              return new ethers.providers.JsonRpcProvider(rpcUrl);
+            }),
+          },
+        },
+      ],
     }).compile();
 
     provider = module.get<CommandGetBalanceCommander>(

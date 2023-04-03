@@ -1,6 +1,7 @@
 import { Inject, Logger } from '@nestjs/common';
 import { CommandRunner, Option, SubCommand } from 'nest-commander';
 import { WalletService } from '../../ether-wallet/wallet/wallet.service';
+import { ConfigService } from '../../utils/config/config.service';
 
 @SubCommand({
   name: 'balance',
@@ -10,6 +11,9 @@ import { WalletService } from '../../ether-wallet/wallet/wallet.service';
 export class CommandGetBalanceCommander extends CommandRunner {
   @Inject()
   private readonly walletService: WalletService;
+
+  @Inject()
+  private readonly configService: ConfigService;
 
   @Option({
     flags: '-r, --rpc-url <url>',
