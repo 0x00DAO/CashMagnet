@@ -19,6 +19,6 @@ describe('ConfigService', () => {
   it('should get config', () => {
     const config = service.get('name');
 
-    expect(config).toBe('Magent');
+    expect(config).toBe('Magnet');
   });
 });

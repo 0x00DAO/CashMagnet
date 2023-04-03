@@ -37,3 +37,9 @@ lerna-debug.log*
 /.vscode
 
 .env
+
+# only include config/default.yaml, exclude other config/*.yaml
+config/*.yaml
+!config/default.yaml
+
+
