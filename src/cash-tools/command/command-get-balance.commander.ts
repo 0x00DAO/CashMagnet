@@ -1,5 +1,6 @@
 import { Inject, Logger } from '@nestjs/common';
 import { CommandRunner, Option, SubCommand } from 'nest-commander';
+// import { default as ora } from 'ora';
 import { DefaultConfigProvider } from '../../configs/default-config-provider.interface';
 import { Assertion } from '../../core/exception/assertion';
 import { WalletService } from '../../ether-wallet/wallet/wallet.service';
