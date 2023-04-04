@@ -1,6 +1,7 @@
 import { Inject, Logger } from '@nestjs/common';
 import { CommandRunner, Option, SubCommand } from 'nest-commander';
 // import { default as ora } from 'ora';
+import { ethers } from 'ethers';
 import { DefaultConfigProvider } from '../../configs/default-config-provider.interface';
 import { Assertion } from '../../core/exception/assertion';
 import { WalletService } from '../../ether-wallet/wallet/wallet.service';
@@ -23,12 +24,13 @@ export class CommandGetBalanceCommander extends CommandRunner {
     const address = inputs[0];
     const network: DefaultConfigProvider = this.getNetwork(options.network);
     const provider = this.walletService.getProvider(network.rpcUrl);
-    const balance = await provider.getBalance(address);
     console.log(
-      `address:${address}, balance: ${balance.toString()}, rpcUrl: ${
-        network.rpcUrl
-      }`
+      `query balance: address ${address}, RPC URL: ${network.rpcUrl}`
     );
+    console.log(`waiting...`);
+
+    const balance = await provider.getBalance(address);
+    console.log(`done! balance: ${ethers.utils.formatEther(balance)}, `);
   }
 
   @Option({
