@@ -2,8 +2,6 @@ import { Inject, Logger } from '@nestjs/common';
 import { CommandRunner, Option, SubCommand } from 'nest-commander';
 // import { default as ora } from 'ora';
 import { ethers } from 'ethers';
-import { DefaultConfigProvider } from '../../configs/default-config-provider.interface';
-import { Assertion } from '../../core/exception/assertion';
 import { WalletService } from '../../ether-wallet/wallet/wallet.service';
 import { ConfigService } from '../../utils/config/config.service';
 
@@ -22,10 +20,11 @@ export class CommandGetBalanceCommander extends CommandRunner {
   private readonly logger: Logger = new Logger(CommandGetBalanceCommander.name);
   async run(inputs: string[], options: Record<string, any>): Promise<void> {
     const address = inputs[0];
-    const network: DefaultConfigProvider = this.getNetwork(options.network);
-    const provider = this.walletService.getProvider(network.rpcUrl);
+    const provider = this.walletService.getProviderWithNetworkConfig(
+      options.network
+    );
     console.log(
-      `query balance: address ${address}, RPC URL: ${network.rpcUrl}`
+      `query balance: address ${address}, RPC URL: ${options.network}`
     );
     console.log(`waiting...`);
 
@@ -40,12 +39,5 @@ export class CommandGetBalanceCommander extends CommandRunner {
   })
   parseNetwork(network: string): string {
     return network;
-  }
-
-  getNetwork(network: string): DefaultConfigProvider {
-    const providers = this.configService.get('providers');
-    const provider = providers[network];
-    Assertion.isNotNull(provider, null, `network ${network} not found`);
-    return provider;
   }
 }
