@@ -15,7 +15,7 @@ export class HdWalletCreateCommander extends CommandRunner {
     const extendedKeyEncrypt = this.encrypt.encryptWithSaltString(
       wallet.extendedKey,
       password,
-      password,
+      password
     );
 
     const logs: string[] = [];
@@ -31,9 +31,7 @@ export class HdWalletCreateCommander extends CommandRunner {
     logs.push(`password: ${password}`);
     logs.push(`### done ###`);
 
-    for (const log of logs) {
-      this.logger.log(log);
-    }
+    console.log(logs.join('\n'));
   }
 
   createHDWallet(): {
