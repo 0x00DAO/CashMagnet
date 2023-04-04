@@ -1,11 +1,12 @@
 import { Logger } from '@nestjs/common';
 import { Command, CommandRunner } from 'nest-commander';
 import { CommandGetBalanceCommander } from './command-get-balance.commander';
+import { CommandTransferEthCommander } from './command-transfer-eth.commander';
 
 @Command({
   name: 'cash-tools',
   arguments: '<task>',
-  subCommands: [CommandGetBalanceCommander],
+  subCommands: [CommandGetBalanceCommander, CommandTransferEthCommander],
   options: { isDefault: false },
   description: 'Cash Tools',
 })
