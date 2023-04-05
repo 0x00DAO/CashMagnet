@@ -1,5 +1,6 @@
+import { DefaultConfigAccountConfig } from './default-config-account.interface';
 import { DefaultConfigCacheTools } from './default-config-cache-tools.interface';
-import { DefaultConfigProvider } from './default-config-provider.interface';
+import { DefaultConfigProviderConfig } from './default-config-provider.interface';
 
 export interface DefaultConfig {
   /**
@@ -22,5 +23,10 @@ export interface DefaultConfig {
   /**
    * The networks of the config
    */
-  networks: Map<string, DefaultConfigProvider>;
+  networks: DefaultConfigProviderConfig;
+
+  /**
+   * The accounts of the config
+   */
+  account: DefaultConfigAccountConfig;
 }
