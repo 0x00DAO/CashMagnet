@@ -1,6 +1,6 @@
 import { Provider } from '@ethersproject/providers';
 import { Test, TestingModule } from '@nestjs/testing';
-import { configServiceMock } from '../../utils/config/config.service.spec.mock';
+import { ConfigService } from '../../utils/config/config.service';
 import { WalletService } from './wallet.service';
 
 describe('WalletService', () => {
@@ -8,7 +8,7 @@ describe('WalletService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [WalletService, configServiceMock],
+      providers: [WalletService, ConfigService],
     }).compile();
 
     service = module.get<WalletService>(WalletService);

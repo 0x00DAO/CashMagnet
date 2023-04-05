@@ -2,7 +2,7 @@ import { TestingModule } from '@nestjs/testing';
 import { ethers } from 'ethers';
 import { CommandTestFactory } from 'nest-commander-testing';
 import { WalletService } from '../../ether-wallet/wallet/wallet.service';
-import { configServiceMock } from '../../utils/config/config.service.spec.mock';
+import { ConfigService } from '../../utils/config/config.service';
 import { CommandGetBalanceCommander } from './command-get-balance.commander';
 
 describe('CommandGetBalanceCommander', () => {
@@ -14,7 +14,7 @@ describe('CommandGetBalanceCommander', () => {
       imports: [],
       providers: [
         CommandGetBalanceCommander,
-        configServiceMock,
+        ConfigService,
         {
           provide: WalletService,
           useValue: {

@@ -16,7 +16,7 @@ export class WalletService {
   }
 
   getProviderWithNetworkConfig(network: string): ethers.providers.Provider {
-    const providers = this.configService.get('providers');
+    const providers = this.configService.get('networks');
     const provider = providers[network];
     if (!provider) {
       return null;
