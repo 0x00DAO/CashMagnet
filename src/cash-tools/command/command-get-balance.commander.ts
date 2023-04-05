@@ -5,6 +5,8 @@ import { ethers } from 'ethers';
 import { WalletService } from '../../ether-wallet/wallet/wallet.service';
 import { ConfigService } from '../../utils/config/config.service';
 
+// console command:
+// node dist/main.js cash-tools balance 0x000
 @SubCommand({
   name: 'balance',
   arguments: '<address>',
@@ -34,10 +36,18 @@ export class CommandGetBalanceCommander extends CommandRunner {
 
   @Option({
     flags: '-network, --network <name>',
-    defaultValue: 'mainnet',
-    description: 'network name eg: mainnet, testnet, custom',
+    description:
+      'network name eg: mainnet, testnet, custom, default in config/default.yaml',
   })
   parseNetwork(network: string): string {
     return network;
+  }
+
+  getProviderWithNetworkConfig(network?: string): ethers.providers.Provider {
+    if (!network) {
+      network = this.configService.get<string>('cashTools.defaultNetwork');
+    }
+    const provider = this.walletService.getProviderWithNetworkConfig(network);
+    return provider;
   }
 }

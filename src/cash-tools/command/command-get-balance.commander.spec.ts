@@ -8,6 +8,7 @@ import { CommandGetBalanceCommander } from './command-get-balance.commander';
 describe('CommandGetBalanceCommander', () => {
   let module: TestingModule;
   let provider: CommandGetBalanceCommander;
+  let walletService: WalletService;
 
   beforeEach(async () => {
     module = await CommandTestFactory.createTestingCommand({
@@ -18,9 +19,13 @@ describe('CommandGetBalanceCommander', () => {
         {
           provide: WalletService,
           useValue: {
-            getProvider: jest.fn().mockImplementation((rpcUrl: string) => {
-              return new ethers.providers.JsonRpcProvider(rpcUrl);
-            }),
+            getProviderWithNetworkConfig: jest
+              .fn()
+              .mockImplementation((network: string) => {
+                return new ethers.providers.JsonRpcProvider(
+                  'https://testnet.era.zksync.dev'
+                );
+              }),
           },
         },
       ],
@@ -29,9 +34,26 @@ describe('CommandGetBalanceCommander', () => {
     provider = module.get<CommandGetBalanceCommander>(
       CommandGetBalanceCommander
     );
+    walletService = module.get<WalletService>(WalletService);
   });
 
   it('should be defined', () => {
     expect(provider).toBeDefined();
+  });
+
+  describe('should be getProviderWithNetworkConfig', () => {
+    it('get with alias', () => {
+      const spyOn = jest.spyOn(walletService, 'getProviderWithNetworkConfig');
+      const result = provider.getProviderWithNetworkConfig('testnet-alias');
+      expect(result).toBeDefined();
+      expect(spyOn).toBeCalledWith('testnet-alias');
+    });
+
+    it('get with default', () => {
+      const spyOn = jest.spyOn(walletService, 'getProviderWithNetworkConfig');
+      const result = provider.getProviderWithNetworkConfig();
+      expect(result).toBeDefined();
+      expect(spyOn).toBeCalledWith('testnet');
+    });
   });
 });

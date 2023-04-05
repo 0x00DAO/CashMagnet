@@ -13,6 +13,6 @@ import { CommandTransferEthCommander } from './command-transfer-eth.commander';
 export class CommandCommander extends CommandRunner {
   private readonly logger: Logger = new Logger(CommandCommander.name);
   async run(inputs: string[], options: Record<string, any>): Promise<void> {
-    this.logger.log(`CommandCommander: ${JSON.stringify(inputs)}`);
+    console.log(`CommandCommander: ${JSON.stringify(inputs)}`);
   }
 }
