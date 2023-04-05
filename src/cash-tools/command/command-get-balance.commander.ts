@@ -6,7 +6,8 @@ import { WalletService } from '../../ether-wallet/wallet/wallet.service';
 import { ConfigService } from '../../utils/config/config.service';
 
 // console command:
-// node dist/main.js cash-tools balance 0x000
+// product: node dist/main.js cash-tools balance <address>
+// default: npx ts-node src/main.ts cash-tools balance <address>
 @SubCommand({
   name: 'balance',
   arguments: '<address>',
@@ -22,16 +23,14 @@ export class CommandGetBalanceCommander extends CommandRunner {
   private readonly logger: Logger = new Logger(CommandGetBalanceCommander.name);
   async run(inputs: string[], options: Record<string, any>): Promise<void> {
     const address = inputs[0];
-    const provider = this.walletService.getProviderWithNetworkConfig(
-      options.network
-    );
-    console.log(
-      `query balance: address ${address}, RPC URL: ${options.network}`
-    );
+    console.log(`query balance begin ...`);
+    console.log(`address: ${address}`);
+    const provider = this.getProviderWithNetworkConfig(options.network);
     console.log(`waiting...`);
 
     const balance = await provider.getBalance(address);
-    console.log(`done! balance: ${ethers.utils.formatEther(balance)}, `);
+    console.log(`balance: ${ethers.utils.formatEther(balance)}`);
+    console.log('done.');
   }
 
   @Option({
@@ -47,6 +46,7 @@ export class CommandGetBalanceCommander extends CommandRunner {
     if (!network) {
       network = this.configService.get<string>('cashTools.defaultNetwork');
     }
+    console.log(`network: ${network}`);
     const provider = this.walletService.getProviderWithNetworkConfig(network);
     return provider;
   }
