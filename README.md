@@ -1,4 +1,10 @@
-# Tools
+# CashMagnet - A NodeJS CLI
+
+## Description
+
+CashMagnet is a NodeJS CLI that allows you to run commands on your local machine.
+
+it can help you earn money by running commands on your local machine.
 
 ## Running the app example
 
@@ -14,12 +20,6 @@ $ node dist/main.js my-exec 'echo Hello World!'
 $ npx ts-node src/main.js my-exec 'echo Hello World!'
 
 ```
-
-## Roadmap
-
-- Date: 2020-04-15
-  - [x] Add support for `transfer` command
-  - [x] Add support for `transfer` command with `--help` option
 
 ## License
 
