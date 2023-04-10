@@ -43,7 +43,7 @@ export class CommandTransferEthCommander extends CommandRunner {
       ethers.utils.parseEther(amount),
       provider
     );
-    console.log(`tx: ${tx.hash}`);
+    this.logTransaction(tx);
     console.log('waiting for tx confirm...');
     await tx.wait();
     console.log('done.');
@@ -116,14 +116,21 @@ export class CommandTransferEthCommander extends CommandRunner {
 
     console.log(`Begin transfer...`);
 
-    return fromSigner
-      .sendTransaction({
-        to,
-        value: amount,
-      })
-      .then((tx) => {
-        console.log(`Transfer tx: ${tx.hash}`);
-        return tx;
-      });
+    return fromSigner.sendTransaction({
+      to,
+      value: amount,
+    });
+  }
+
+  async logTransaction(
+    tx: ethers.providers.TransactionResponse,
+    network?: string
+  ) {
+    if (!network) {
+      network = this.configService.get<string>('cashTools.defaultNetwork');
+    }
+    const provider = this.walletService.getProviderConfig(network);
+    const etherscanUrl = provider.blockExplorerUrl;
+    console.log(`Transfer tx: ${etherscanUrl}/tx/${tx.hash}`);
   }
 }
