@@ -34,4 +34,13 @@ describe('CommandTransferEthCommander', () => {
     expect(spawnSpy).toHaveBeenCalledTimes(1);
     expect(spawnSpy).toHaveBeenCalledWith(['from', 'to', '0.1'], {});
   });
+
+  describe('getAccounts', () => {
+    it('should return accounts', () => {
+      const accounts = provider.getAccounts();
+      expect(accounts.length).toBeGreaterThan(0);
+
+      console.log(accounts);
+    });
+  });
 });
