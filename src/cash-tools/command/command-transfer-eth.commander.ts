@@ -6,10 +6,10 @@ import { Assertion } from '../../core/exception/assertion';
 import { WalletService } from '../../ether-wallet/wallet/wallet.service';
 import { ConfigService } from '../../utils/config/config.service';
 
-//console command: node dist/main.js cash-tools transfer-eth from to 0.1
+//default: npx ts-node src/main.ts cash-tools transfer-eth 0.1 --from 0 --to 1
 @SubCommand({
   name: 'transfer-eth',
-  arguments: '<from> <to> <amount>',
+  arguments: '<amount>',
   description: 'transfer eth',
 })
 export class CommandTransferEthCommander extends CommandRunner {
@@ -20,32 +20,60 @@ export class CommandTransferEthCommander extends CommandRunner {
   private readonly configService: ConfigService;
 
   async run(inputs: string[], options: Record<string, any>): Promise<void> {
-    console.log(inputs);
     const network = options.network;
     const provider = this.getProviderWithNetworkConfig(network);
 
-    const [fromAccount, toAccount] = this.getAccounts();
-    const fromSigner = new Wallet(fromAccount.privateKey, provider);
-    console.log(`from: ${fromSigner.address}`);
-    const to = ethers.utils.computeAddress(toAccount.privateKey);
-    console.log(`to: ${to}`);
-    const amount = ethers.utils.parseEther(inputs[2]);
-    console.log(`amount: ${amount}`);
+    const fromIndex = options.fromAddressIndex;
+    const toIndex = options.toAddressIndex;
 
-    const tx = await fromSigner.sendTransaction({
-      to,
-      value: amount,
-    });
-    await tx.wait();
+    Assertion.isTrue(
+      fromIndex !== toIndex,
+      null,
+      'from address index and to address index must be different'
+    );
+
+    const accounts = this.getAccounts();
+    const fromPrivateKey = accounts[fromIndex].privateKey;
+    const toPrivateKey = accounts[toIndex].privateKey;
+
+    const tx = await this.transferEth(
+      fromPrivateKey,
+      toPrivateKey,
+      ethers.utils.parseEther(inputs[2]),
+      provider
+    );
     console.log(`tx: ${tx.hash}`);
+    console.log('waiting for tx confirm...');
+    await tx.wait();
+    console.log('done.');
   }
   @Option({
-    flags: '-network, --network <name>',
+    flags: '--network, --network <name>',
     description:
       'network name eg: mainnet, testnet, custom, default in config/default.yaml',
   })
   parseNetwork(network: string): string {
     return network;
+  }
+
+  @Option({
+    flags: '--from, --from-address-index <index>',
+    defaultValue: 0,
+    description:
+      'network name eg: mainnet, testnet, custom, default in config/default.yaml',
+  })
+  parseFromAddressIndex(index: number): number {
+    return index;
+  }
+
+  @Option({
+    flags: '--to, --to-address-index <index>',
+    defaultValue: 1,
+    description:
+      'network name eg: mainnet, testnet, custom, default in config/default.yaml',
+  })
+  parseToAddress(index: number): number {
+    return index;
   }
 
   getProviderWithNetworkConfig(network?: string): ethers.providers.Provider {
@@ -70,5 +98,31 @@ export class CommandTransferEthCommander extends CommandRunner {
       `only support privateKey account`
     );
     return account.value as { privateKey: string }[];
+  }
+
+  async transferEth(
+    fromPrivateKey: string,
+    toPrivateKey: string,
+    amount: ethers.BigNumber,
+    provider: ethers.providers.Provider
+  ): Promise<ethers.providers.TransactionResponse> {
+    const fromSigner = new Wallet(fromPrivateKey, provider);
+    const to = ethers.utils.computeAddress(toPrivateKey);
+
+    console.log(`Transfer Amount: ${ethers.utils.formatEther(amount)}`);
+    console.log(`Transfer From: ${fromSigner.address} [${fromPrivateKey}]`);
+    console.log(`Transfer To: ${to} [${toPrivateKey}] `);
+
+    console.log(`Begin transfer...`);
+
+    return fromSigner
+      .sendTransaction({
+        to,
+        value: amount,
+      })
+      .then((tx) => {
+        console.log(`Transfer tx: ${tx.hash}`);
+        return tx;
+      });
   }
 }
