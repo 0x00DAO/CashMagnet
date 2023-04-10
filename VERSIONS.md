@@ -9,3 +9,7 @@
 ### 0.1.0.20230403.1
 
 1. add query balance command, eg:`npx ts-node ./src/main.ts cash-tools balance 0x000....`
+
+### 0.1.0.20230410.1
+
+1. add transfer command, eg:`npx ts-node ./src/main.ts cash-tools transfer 100 --from 0 --to 1`
