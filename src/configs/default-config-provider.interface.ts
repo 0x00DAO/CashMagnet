@@ -7,3 +7,5 @@ export interface DefaultConfigProvider {
   blockExplorerUrl: string;
   webSocketUrl: string;
 }
+
+export type DefaultConfigProviderConfig = Map<string, DefaultConfigProvider>;

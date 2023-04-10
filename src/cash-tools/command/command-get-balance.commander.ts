@@ -1,10 +1,13 @@
 import { Inject, Logger } from '@nestjs/common';
 import { CommandRunner, Option, SubCommand } from 'nest-commander';
-import { DefaultConfigProvider } from '../../configs/default-config-provider.interface';
-import { Assertion } from '../../core/exception/assertion';
+// import { default as ora } from 'ora';
+import { ethers } from 'ethers';
 import { WalletService } from '../../ether-wallet/wallet/wallet.service';
 import { ConfigService } from '../../utils/config/config.service';
 
+// console command:
+// product: node dist/main.js cash-tools balance <address>
+// default: npx ts-node src/main.ts cash-tools balance <address>
 @SubCommand({
   name: 'balance',
   arguments: '<address>',
@@ -20,29 +23,31 @@ export class CommandGetBalanceCommander extends CommandRunner {
   private readonly logger: Logger = new Logger(CommandGetBalanceCommander.name);
   async run(inputs: string[], options: Record<string, any>): Promise<void> {
     const address = inputs[0];
-    const network: DefaultConfigProvider = this.getNetwork(options.network);
-    const provider = this.walletService.getProvider(network.rpcUrl);
+    console.log(`query balance begin ...`);
+    console.log(`address: ${address}`);
+    const provider = this.getProviderWithNetworkConfig(options.network);
+    console.log(`waiting...`);
+
     const balance = await provider.getBalance(address);
-    console.log(
-      `address:${address}, balance: ${balance.toString()}, rpcUrl: ${
-        network.rpcUrl
-      }`
-    );
+    console.log(`balance: ${ethers.utils.formatEther(balance)}`);
+    console.log('done.');
   }
 
   @Option({
     flags: '-network, --network <name>',
-    defaultValue: 'mainnet',
-    description: 'network name eg: mainnet, testnet, custom',
+    description:
+      'network name eg: mainnet, testnet, custom, default in config/default.yaml',
   })
   parseNetwork(network: string): string {
     return network;
   }
 
-  getNetwork(network: string): DefaultConfigProvider {
-    const providers = this.configService.get('providers');
-    const provider = providers[network];
-    Assertion.isNotNull(provider, null, `network ${network} not found`);
+  getProviderWithNetworkConfig(network?: string): ethers.providers.Provider {
+    if (!network) {
+      network = this.configService.get<string>('cashTools.defaultNetwork');
+    }
+    console.log(`network: ${network}`);
+    const provider = this.walletService.getProviderWithNetworkConfig(network);
     return provider;
   }
 }

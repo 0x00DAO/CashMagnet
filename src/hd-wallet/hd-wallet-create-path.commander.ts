@@ -6,7 +6,7 @@ import { AesEncryption } from '../utils/encryption/aes.encryption';
 @SubCommand({ name: 'create-path', arguments: '<extendedKey>' })
 export class HdWalletCreatePathCommander extends CommandRunner {
   private readonly logger: Logger = new Logger(
-    HdWalletCreatePathCommander.name,
+    HdWalletCreatePathCommander.name
   );
 
   private readonly encrypt = new AesEncryption();
@@ -49,7 +49,7 @@ export class HdWalletCreatePathCommander extends CommandRunner {
     const { wallet, path } = await this.createPathWallet(
       extendedKey,
       accountId,
-      accountIndex,
+      accountIndex
     ).catch((e) => {
       this.logger.error(e);
       throw e;
@@ -66,8 +66,8 @@ export class HdWalletCreatePathCommander extends CommandRunner {
         `extendedKeyEncrypt: ${this.encrypt.encryptWithSaltString(
           wallet.extendedKey,
           password,
-          password,
-        )}`,
+          password
+        )}`
       );
     }
 
@@ -75,9 +75,7 @@ export class HdWalletCreatePathCommander extends CommandRunner {
     logs.push(`path: ${path}`);
     logs.push(`done.`);
 
-    for (const log of logs) {
-      this.logger.log(log);
-    }
+    console.log(logs.join('\n'));
   }
 
   decodeExtendedKey(extendedKey: string, password: string): string {
@@ -86,7 +84,7 @@ export class HdWalletCreatePathCommander extends CommandRunner {
     }
     const { decrypted } = this.encrypt.decryptWithSaltString(
       extendedKey,
-      password,
+      password
     );
     return decrypted;
   }
@@ -94,7 +92,7 @@ export class HdWalletCreatePathCommander extends CommandRunner {
   async createPathWallet(
     extendedKey: string,
     accountId: number,
-    accountIndex: number,
+    accountIndex: number
   ): Promise<{ wallet: HDNode; path: string }> {
     const wallet = HDNode.fromExtendedKey(extendedKey);
     let path = this.getAccountBasePath(accountId) + '/' + accountIndex;

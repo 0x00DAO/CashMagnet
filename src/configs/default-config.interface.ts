@@ -1,4 +1,6 @@
-import { DefaultConfigProvider } from './default-config-provider.interface';
+import { DefaultConfigAccountConfig } from './default-config-account.interface';
+import { DefaultConfigCacheTools } from './default-config-cache-tools.interface';
+import { DefaultConfigProviderConfig } from './default-config-provider.interface';
 
 export interface DefaultConfig {
   /**
@@ -10,7 +12,21 @@ export interface DefaultConfig {
    */
   description: string;
   /**
-   * The providers of the config
+   * The version of the config
    */
-  providers: Map<string, DefaultConfigProvider>;
+  version: string;
+
+  /**
+   * The cache tools of the config
+   */
+  cashTools: DefaultConfigCacheTools;
+  /**
+   * The networks of the config
+   */
+  networks: DefaultConfigProviderConfig;
+
+  /**
+   * The accounts of the config
+   */
+  account: DefaultConfigAccountConfig;
 }

@@ -18,7 +18,20 @@
 
 name: Magnet
 description: Configuration for Cash Magnet
-providers:
+version: 0.0.1
+cashTools:
+  # Cash Tools configuration
+  #
+  # The following configuration is used to configure the Cash Tools
+  # application. The configuration is divided into two sections:
+  # - `cashTools` - the main configuration section
+
+  # - `cashTools.defaultNetwork` - the default network to use, which is
+  #   used to configure the default network for the application.
+  defaultNetwork: testnet
+  defaultAccount: default
+
+networks:
   # Common mainnet configuration
   mainnet:
     name: zkSyncEra
@@ -55,3 +68,41 @@ providers:
     currencySymbol: ETH
     blockExplorerUrl: https://goerli.explorer.zksync.io/
     webSocketUrl: wss://testnet.era.zksync.dev/ws
+
+accounts:
+  # Accounts configuration
+  # this has tow types of accounts
+  # 1. Wallets private keys
+  # eg:
+  # name: default
+  # type: privateKey
+  # value:
+  #   - privateKey: 0xcba99340c0160e56507ea18a54fd123f78c862b08f57f8c9d6a7e21b70dc3d58
+  #   - privateKey: 0xb246aebaaa04370fedd9f496e5f2729572405e75c78639c01b1a56a4807b2e4b
+  - name: default
+    type: privateKey
+    value:
+      # address: 0x3f1914C88Dd604FdB78bc193073E192d80D4B3bf
+      - privateKey: 0xcba99340c0160e56507ea18a54fd123f78c862b08f57f8c9d6a7e21b70dc3d58
+      # address: 0xC2977b39917B1Ca5aB4cD981Ea67Db758aDF187a
+      - privateKey: 0xb246aebaaa04370fedd9f496e5f2729572405e75c78639c01b1a56a4807b2e4b
+      # address: 0xa28C9ac2C924E262256b070639d27680fD5Fad97
+      - privateKey: 0x39abb131a9318888ba689b28b6b53211fcebe2063aa1c5d2b9a28f667578f31d
+
+  # 2. Wallets HD Wallet
+  # eg:
+  # name: Wallets-1
+  # type: hdWallet
+  # value:
+  #   extendedKey: "***rfVXP3nS39nX8c9BXovDtQ==.IQG2gp8SciEG2uY6sy2S/Z8rs**********"
+  #   password: "123456"
+  #   initialIndex: 0
+  #   count: 10
+
+  - name: Wallets-1
+    type: hdWallet
+    value:
+      extendedKey: '***rfVXP3nS39nX8c9BXovDtQ==.IQG2gp8SciEG2uY6sy2S/Z8rs**********'
+      password: '123456'
+      initialIndex: 0
+      count: 10
