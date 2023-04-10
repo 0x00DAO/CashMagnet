@@ -36,10 +36,11 @@ export class CommandTransferEthCommander extends CommandRunner {
     const fromPrivateKey = accounts[fromIndex].privateKey;
     const toPrivateKey = accounts[toIndex].privateKey;
 
+    const amount = inputs[0];
     const tx = await this.transferEth(
       fromPrivateKey,
       toPrivateKey,
-      ethers.utils.parseEther(inputs[2]),
+      ethers.utils.parseEther(amount),
       provider
     );
     console.log(`tx: ${tx.hash}`);
