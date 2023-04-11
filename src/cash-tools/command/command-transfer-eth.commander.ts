@@ -7,6 +7,7 @@ import { WalletService } from '../../ether-wallet/wallet/wallet.service';
 import { ConfigService } from '../../utils/config/config.service';
 
 //default: npx ts-node src/main.ts cash-tools transfer-eth 0.1 --from 0 --to 1
+//default.2: npx ts-node src/main.ts cash-tools transfer-eth 0.1 --transfer-path 0,1
 @SubCommand({
   name: 'transfer-eth',
   arguments: '<amount>',
@@ -135,6 +136,8 @@ export class CommandTransferEthCommander extends CommandRunner {
     );
 
     for (let i = 0; i < transferPath.length - 1; i++) {
+      const step = `[${i + 1}/${transferPath.length - 1}]`;
+      console.log(`transfer eth ${step}...`);
       const fromIndex = transferPath[i];
       const toIndex = transferPath[i + 1];
 
@@ -147,10 +150,10 @@ export class CommandTransferEthCommander extends CommandRunner {
         ethers.utils.parseEther(amount),
         provider
       );
-      this.logTransaction(tx);
-      console.log('waiting for tx confirm...');
+      this.logTransaction(tx, step);
+      console.log(`${step} waiting for tx confirm...`);
       await tx.wait();
-      console.log('done.');
+      console.log(`${step} done.`);
     }
   }
 
@@ -177,6 +180,7 @@ export class CommandTransferEthCommander extends CommandRunner {
 
   async logTransaction(
     tx: ethers.providers.TransactionResponse,
+    logPrefix: string = 'step',
     network?: string
   ) {
     if (!network) {
@@ -184,7 +188,7 @@ export class CommandTransferEthCommander extends CommandRunner {
     }
     const provider = this.walletService.getProviderConfig(network);
     const etherscanUrl = provider.blockExplorerUrl;
-    console.log(`Transfer tx: ${etherscanUrl}/tx/${tx.hash}`);
+    console.log(`${logPrefix} Transfer tx: ${etherscanUrl}/tx/${tx.hash}`);
   }
 
   getTransferPathIndex(path: string): number[] {

@@ -1,6 +1,6 @@
 {
   "name": "cash-magnet",
-  "version": "0.1.0.20230410.1",
+  "version": "0.1.0.20230411.1",
   "description": "",
   "bin": {
     "crun": "dist/main"

@@ -13,3 +13,7 @@
 ### 0.1.0.20230410.1
 
 1. add transfer command, eg:`npx ts-node ./src/main.ts cash-tools transfer-eth 100 --from 0 --to 1`
+
+### 0.1.0.20230411.1
+
+1. support transfer path command, eg:`npx ts-node ./src/main.ts cash-tools transfer-path 0.1 --transfer-path 0,1`
