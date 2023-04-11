@@ -24,31 +24,29 @@ export class CommandTransferEthCommander extends CommandRunner {
   async run(inputs: string[], options: Record<string, any>): Promise<void> {
     const network = options.network;
     const provider = this.getProviderWithNetworkConfig(network);
+    const accounts = this.getAccounts();
+    const amount = inputs[0];
+    let transferPath = this.optionTransferPath;
 
     const fromIndex = options.fromAddressIndex;
     const toIndex = options.toAddressIndex;
 
-    Assertion.isTrue(
-      fromIndex !== toIndex,
-      null,
-      'from address index and to address index must be different'
-    );
+    if (fromIndex !== undefined && toIndex !== undefined) {
+      Assertion.isTrue(
+        fromIndex !== toIndex,
+        null,
+        'from address index and to address index must be different'
+      );
+      transferPath = [fromIndex, toIndex];
+    }
 
-    const accounts = this.getAccounts();
-    const fromPrivateKey = accounts[fromIndex].privateKey;
-    const toPrivateKey = accounts[toIndex].privateKey;
-
-    const amount = inputs[0];
-    const tx = await this.transferEth(
-      fromPrivateKey,
-      toPrivateKey,
-      ethers.utils.parseEther(amount),
-      provider
+    console.log(`amount: ${amount}`);
+    console.log(
+      `transfer path: ${transferPath}, count: ${transferPath.length - 1}`
     );
-    this.logTransaction(tx);
-    console.log('waiting for tx confirm...');
-    await tx.wait();
-    console.log('done.');
+    console.log(`begin transfer eth ...`);
+    await this.transferEthByPath(amount, transferPath, accounts, provider);
+    console.log(`transfer eth done`);
   }
   @Option({
     flags: '--network, --network <name>',
@@ -61,7 +59,6 @@ export class CommandTransferEthCommander extends CommandRunner {
 
   @Option({
     flags: '--from, --from-address-index <index>',
-    defaultValue: 0,
     description:
       'network name eg: mainnet, testnet, custom, default in config/default.yaml',
   })
@@ -71,7 +68,6 @@ export class CommandTransferEthCommander extends CommandRunner {
 
   @Option({
     flags: '--to, --to-address-index <index>',
-    defaultValue: 1,
     description:
       'network name eg: mainnet, testnet, custom, default in config/default.yaml',
   })
@@ -117,6 +113,47 @@ export class CommandTransferEthCommander extends CommandRunner {
     return account.value as { privateKey: string }[];
   }
 
+  async transferEthByPath(
+    amount: string,
+    transferPath: number[],
+    accounts: { privateKey: string }[],
+    provider: ethers.providers.Provider
+  ) {
+    //check transfer path
+    for (const index of transferPath) {
+      Assertion.isTrue(
+        index < accounts.length,
+        null,
+        `transfer path index ${index} is out of range`
+      );
+    }
+    const pathValid = this.verifyTransferPath(transferPath);
+    Assertion.isTrue(
+      pathValid,
+      null,
+      `transfer path ${transferPath} is not valid`
+    );
+
+    for (let i = 0; i < transferPath.length - 1; i++) {
+      const fromIndex = transferPath[i];
+      const toIndex = transferPath[i + 1];
+
+      const fromPrivateKey = accounts[fromIndex].privateKey;
+      const toPrivateKey = accounts[toIndex].privateKey;
+
+      const tx = await this.transferEth(
+        fromPrivateKey,
+        toPrivateKey,
+        ethers.utils.parseEther(amount),
+        provider
+      );
+      this.logTransaction(tx);
+      console.log('waiting for tx confirm...');
+      await tx.wait();
+      console.log('done.');
+    }
+  }
+
   async transferEth(
     fromPrivateKey: string,
     toPrivateKey: string,
@@ -153,5 +190,14 @@ export class CommandTransferEthCommander extends CommandRunner {
   getTransferPathIndex(path: string): number[] {
     const orderArr: string[] = path.split(',');
     return orderArr.map((order) => parseInt(order, 10));
+  }
+
+  verifyTransferPath(path: number[]): boolean {
+    for (let i = 0; i < path.length - 1; i++) {
+      if (path[i] === path[i + 1]) {
+        return false;
+      }
+    }
+    return true;
   }
 }
