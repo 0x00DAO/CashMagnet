@@ -34,7 +34,7 @@ export class CommandGetBalanceCommander extends CommandRunner {
   }
 
   @Option({
-    flags: '-network, --network <name>',
+    flags: '--network, --network <name>',
     description:
       'network name eg: mainnet, testnet, custom, default in config/default.yaml',
   })

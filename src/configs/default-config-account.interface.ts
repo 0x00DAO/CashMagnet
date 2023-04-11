@@ -6,7 +6,7 @@ export interface DefaultConfigAccount {
 
 export interface DefaultConfigAccountPrivateKey extends DefaultConfigAccount {
   type: 'privateKey';
-  value: string[];
+  value: { privateKey: string }[];
 }
 export interface DefaultConfigAccountHDWallet extends DefaultConfigAccount {
   type: 'hdWallet';

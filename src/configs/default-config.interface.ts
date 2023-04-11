@@ -28,5 +28,5 @@ export interface DefaultConfig {
   /**
    * The accounts of the config
    */
-  account: DefaultConfigAccountConfig;
+  accounts: DefaultConfigAccountConfig;
 }

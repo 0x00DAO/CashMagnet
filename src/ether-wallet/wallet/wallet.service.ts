@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
+import { DefaultConfigProvider } from '../../configs/default-config-provider.interface';
 import { ConfigService } from '../../utils/config/config.service';
 
 @Injectable()
@@ -16,11 +17,19 @@ export class WalletService {
   }
 
   getProviderWithNetworkConfig(network: string): ethers.providers.Provider {
+    const provider = this.getProviderConfig(network);
+    if (!provider) {
+      return null;
+    }
+    return this.getProvider(provider.rpcUrl);
+  }
+
+  getProviderConfig(network: string): DefaultConfigProvider {
     const providers = this.configService.get('networks');
     const provider = providers[network];
     if (!provider) {
       return null;
     }
-    return this.getProvider(provider.rpcUrl);
+    return provider;
   }
 }
