@@ -19,6 +19,8 @@ export class CommandTransferEthCommander extends CommandRunner {
   @Inject()
   private readonly configService: ConfigService;
 
+  private readonly optionTransferPath: number[] = [0, 1];
+
   async run(inputs: string[], options: Record<string, any>): Promise<void> {
     const network = options.network;
     const provider = this.getProviderWithNetworkConfig(network);
@@ -77,6 +79,20 @@ export class CommandTransferEthCommander extends CommandRunner {
     return index;
   }
 
+  @Option({
+    flags: '--transfer-path, --transfer-path <path>',
+    description:
+      'transfer path eg: 0,1,2,0, means transfer from 0 to 1, then 1 to 2, then 2 to 0 \n' +
+      'default is 0,1',
+  })
+  parseTransferPath(index: string): number[] {
+    const transferPath = this.getTransferPathIndex(index);
+    //clear transfer path
+    this.optionTransferPath.splice(0, this.optionTransferPath.length);
+    this.optionTransferPath.push(...transferPath);
+    return transferPath;
+  }
+
   getProviderWithNetworkConfig(network?: string): ethers.providers.Provider {
     if (!network) {
       network = this.configService.get<string>('cashTools.defaultNetwork');
@@ -132,5 +148,10 @@ export class CommandTransferEthCommander extends CommandRunner {
     const provider = this.walletService.getProviderConfig(network);
     const etherscanUrl = provider.blockExplorerUrl;
     console.log(`Transfer tx: ${etherscanUrl}/tx/${tx.hash}`);
+  }
+
+  getTransferPathIndex(path: string): number[] {
+    const orderArr: string[] = path.split(',');
+    return orderArr.map((order) => parseInt(order, 10));
   }
 }

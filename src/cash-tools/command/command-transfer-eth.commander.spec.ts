@@ -89,4 +89,14 @@ describe('CommandTransferEthCommander', () => {
       30 * 1000
     );
   });
+
+  describe('getTransferPath', () => {
+    it.each([
+      ['0,1,2,0', [0, 1, 2, 0]],
+      ['0,1,2', [0, 1, 2]],
+    ])('should return transfer path', (pathString, expected) => {
+      const path = command.getTransferPathIndex(pathString);
+      expect(path).toEqual(expected);
+    });
+  });
 });
