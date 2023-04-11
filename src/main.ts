@@ -6,7 +6,7 @@ import { APP_VERSION } from './app.version';
 async function bootstrap() {
   const logger = new Logger();
   logger.log(`Application StartUp, Version: ${APP_VERSION}`);
-  await CommandFactory.run(AppModule, logger);
-  // await CommandFactory.run(AppModule);
+  // await CommandFactory.run(AppModule, logger);
+  await CommandFactory.run(AppModule);
 }
 bootstrap();

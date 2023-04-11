@@ -1,4 +1,10 @@
-# Tools
+# CashMagnet - A NodeJS CLI
+
+## Description
+
+CashMagnet is a NodeJS CLI that allows you to run commands on your local machine.
+
+it can help you earn money by running commands on your local machine.
 
 ## Running the app example
 
@@ -15,53 +21,9 @@ $ npx ts-node src/main.js my-exec 'echo Hello World!'
 
 ```
 
-## nest js
+## RoadMap
 
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Installation
-
-```bash
-$ npm install
-```
-
-## Running the app example
-
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Link: [RoadMap](RoadMap.md)
 
 ## License
 

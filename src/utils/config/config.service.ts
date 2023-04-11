@@ -3,7 +3,7 @@ import config from 'config';
 
 @Injectable()
 export class ConfigService {
-  get(key: string): string {
-    return config.get(key);
+  get<T>(key: string): T {
+    return config.get<T>(key);
   }
 }
