@@ -102,7 +102,7 @@ describe('CommandTransferEthCommander', () => {
   });
 
   describe('transferEth', () => {
-    it.skip(
+    it(
       'should transfer eth',
       async () => {
         const accounts = command.getAccounts();
@@ -118,7 +118,6 @@ describe('CommandTransferEthCommander', () => {
           provider
         );
         await tx.wait();
-        console.log(tx);
       },
       30 * 1000
     );
@@ -136,26 +135,37 @@ describe('CommandTransferEthCommander', () => {
 
   describe('transferEthByPath', () => {
     beforeEach(() => {
-      command.transferEth = jest.fn().mockImplementation(() => transferTx);
+      // command.transferEth = jest.fn().mockImplementation(() => transferTx);
     });
 
     it('should transfer eth by path', async () => {
       const accounts = command.getAccounts();
-      const amount = '0.1';
+      const amount = '1000';
       const network = 'testnet';
       const provider = command.getProviderWithNetworkConfig(network);
       const transferPath = [0, 1, 2, 0];
 
       const transferEthSpy = jest.spyOn(command, 'transferEth');
-      const tx = await command.transferEthByPath(
-        amount,
-        transferPath,
-        accounts,
-        provider
-      );
-      console.log(tx);
+      await command.transferEthByPath(amount, transferPath, accounts, provider);
 
       expect(transferEthSpy).toHaveBeenCalledTimes(transferPath.length - 1);
+    });
+  });
+
+  describe('computeTransferAmount', () => {
+    it('should compute transfer amount', async () => {
+      const accounts = command.getAccounts();
+      const amount = ethers.utils.parseEther('1000');
+      const from = ethers.utils.computeAddress(accounts[0].privateKey);
+      const to = ethers.utils.computeAddress(accounts[1].privateKey);
+      const provider = command.getProviderWithNetworkConfig('testnet');
+      const transferAmount = await command.computeTransferAmount(
+        from,
+        to,
+        amount,
+        provider
+      );
+      expect(amount.gt(transferAmount)).toBeTruthy();
     });
   });
 });
