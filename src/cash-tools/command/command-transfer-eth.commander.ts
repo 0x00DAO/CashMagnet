@@ -1,6 +1,11 @@
 import { Inject } from '@nestjs/common';
 import { BigNumber, Wallet, ethers } from 'ethers';
-import { CommandRunner, Option, SubCommand } from 'nest-commander';
+import {
+  CommandRunner,
+  InquirerService,
+  Option,
+  SubCommand,
+} from 'nest-commander';
 import { DefaultConfigAccount } from '../../configs/default-config-account.interface';
 import { Assertion } from '../../core/exception/assertion';
 import { WalletService } from '../../ether-wallet/wallet/wallet.service';
@@ -23,6 +28,9 @@ export class CommandTransferEthCommander extends CommandRunner {
 
   @Inject()
   private readonly logger: ConsoleLoggerService;
+
+  @Inject()
+  private readonly inquirer: InquirerService;
 
   private readonly optionTransferPath: number[] = [0, 1];
 
@@ -63,6 +71,7 @@ export class CommandTransferEthCommander extends CommandRunner {
         this.currentTransferMaxGasFee.mul(transferPath.length - 1)
       )}`
     );
+
     this.logger.log(`🍺 begin transfer eth ...`);
     await this.transferEthByPath(amount, transferPath, accounts, provider);
     this.logger.log(`🍺 transfer eth done!`);
@@ -168,7 +177,8 @@ export class CommandTransferEthCommander extends CommandRunner {
         fromPrivateKey,
         toPrivateKey,
         ethers.utils.parseEther(amount),
-        provider
+        provider,
+        this.currentTransferMaxGasFee
       );
       this.logger.log(`waiting for tx:${tx.hash} confirm...`);
       const txReceipt = await tx.wait();
@@ -183,23 +193,28 @@ export class CommandTransferEthCommander extends CommandRunner {
     fromPrivateKey: string,
     toPrivateKey: string,
     amount: ethers.BigNumber,
-    provider: ethers.providers.Provider
+    provider: ethers.providers.Provider,
+    maxGasFee?: ethers.BigNumber
   ): Promise<ethers.providers.TransactionResponse> {
     const fromSigner = new Wallet(fromPrivateKey, provider);
     const to = ethers.utils.computeAddress(toPrivateKey);
 
+    if (!maxGasFee) {
+      maxGasFee = await this.getTransferGasFee(provider);
+    }
+
     const transferAmount = await this.computeTransferAmount(
       fromSigner.address,
       amount,
-      this.currentTransferMaxGasFee,
+      maxGasFee,
       provider
     );
 
     Assertion.isTrue(
-      transferAmount.gt(this.currentTransferMaxGasFee),
+      transferAmount.gt(maxGasFee),
       null,
       `transfer amount must be greater than max gas fee :${ethers.utils.formatEther(
-        this.currentTransferMaxGasFee
+        maxGasFee
       )}`
     );
 
