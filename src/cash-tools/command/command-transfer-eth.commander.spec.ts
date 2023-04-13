@@ -157,12 +157,12 @@ describe('CommandTransferEthCommander', () => {
       const accounts = command.getAccounts();
       const amount = ethers.utils.parseEther('1000');
       const from = ethers.utils.computeAddress(accounts[0].privateKey);
-      const to = ethers.utils.computeAddress(accounts[1].privateKey);
       const provider = command.getProviderWithNetworkConfig('testnet');
+      const maxFee = ethers.utils.parseEther('0.00021');
       const transferAmount = await command.computeTransferAmount(
         from,
-        to,
         amount,
+        maxFee,
         provider
       );
       expect(amount.gt(transferAmount)).toBeTruthy();

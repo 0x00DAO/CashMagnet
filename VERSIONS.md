@@ -21,3 +21,4 @@
 ### 0.1.0.20230413.1
 
 1. optimize transfer log format
+2. fix the problem that the minimum amount in the `transfer-eth` command cannot be less than the gas cost

@@ -26,6 +26,11 @@ export class CommandTransferEthCommander extends CommandRunner {
 
   private readonly optionTransferPath: number[] = [0, 1];
 
+  /**
+   * current transfer max gas fee
+   */
+  private currentTransferMaxGasFee: BigNumber;
+
   async run(inputs: string[], options: Record<string, any>): Promise<void> {
     const network = options.network;
     const provider = this.getProviderWithNetworkConfig(network);
@@ -174,17 +179,27 @@ export class CommandTransferEthCommander extends CommandRunner {
     const fromSigner = new Wallet(fromPrivateKey, provider);
     const to = ethers.utils.computeAddress(toPrivateKey);
 
+    if (!this.currentTransferMaxGasFee) {
+      this.currentTransferMaxGasFee = await this.getTransferGasFee(
+        fromSigner.address,
+        to,
+        provider
+      );
+    }
+
     const transferAmount = await this.computeTransferAmount(
       fromSigner.address,
-      to,
       amount,
+      this.currentTransferMaxGasFee,
       provider
     );
 
     Assertion.isTrue(
-      transferAmount.gt(0),
+      transferAmount.gt(this.currentTransferMaxGasFee),
       null,
-      `transfer amount must be greater than 0`
+      `transfer amount must be greater than max gas fee :${ethers.utils.formatEther(
+        this.currentTransferMaxGasFee
+      )}`
     );
 
     this.logger.log(
@@ -202,32 +217,14 @@ export class CommandTransferEthCommander extends CommandRunner {
 
   async computeTransferAmount(
     from: string,
-    to: string,
     amount: ethers.BigNumber,
+    maxFee: ethers.BigNumber,
     provider: ethers.providers.Provider
   ) {
     //get balance
     const fromBalance = await provider.getBalance(from);
     if (fromBalance.lte(amount)) {
-      //get gas price
-      const gasFeeData = await provider.getFeeData();
-      const gasPrice = gasFeeData.maxFeePerGas ?? gasFeeData.gasPrice;
-      const gasMaxPriorityFeePerGas =
-        gasFeeData.maxPriorityFeePerGas ?? BigNumber.from(0);
-
-      //compute gas limit
-      const gasLimit = await provider.estimateGas({
-        from,
-        to,
-        value: amount,
-      });
-
-      this.logger.log(`gasLimit: ${gasLimit.toString()}`);
       //compute max fee
-      const maxFee = gasPrice
-        .mul(gasLimit)
-        .add(gasMaxPriorityFeePerGas.mul(gasLimit));
-
       return fromBalance.sub(maxFee);
     }
     return amount;
