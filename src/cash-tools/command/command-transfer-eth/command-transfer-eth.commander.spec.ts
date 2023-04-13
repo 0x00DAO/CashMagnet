@@ -1,8 +1,8 @@
 import { TestingModule } from '@nestjs/testing';
 import { BigNumber, ethers } from 'ethers';
 import { CommandTestFactory } from 'nest-commander-testing';
+import { CommandModule } from '../command.module';
 import { CommandTransferEthCommander } from './command-transfer-eth.commander';
-import { CommandModule } from './command.module';
 
 const transferTx = {
   nonce: 0,
@@ -42,7 +42,7 @@ describe('CommandTransferEthCommander', () => {
 
   describe('run', () => {
     beforeEach(() => {
-      command.transferEth = jest.fn().mockImplementation(() => transferTx);
+      // command.transferEth = jest.fn().mockImplementation(() => transferTx);
     });
     it('should call the "run" method', async () => {
       const spawnSpy = jest.spyOn(command, 'run');
@@ -71,6 +71,7 @@ describe('CommandTransferEthCommander', () => {
         'cash-tools',
         'transfer-eth',
         '0.1',
+        '--s',
       ]);
 
       expect(spawnSpy).toHaveBeenCalledTimes(1);
@@ -87,6 +88,7 @@ describe('CommandTransferEthCommander', () => {
         '0.1',
         '--transfer-path',
         '0,1,0',
+        '--s',
       ]);
 
       expect(spawnSpy).toHaveBeenCalledTimes(1);
@@ -102,7 +104,7 @@ describe('CommandTransferEthCommander', () => {
   });
 
   describe('transferEth', () => {
-    it.skip(
+    it(
       'should transfer eth',
       async () => {
         const accounts = command.getAccounts();
@@ -118,7 +120,6 @@ describe('CommandTransferEthCommander', () => {
           provider
         );
         await tx.wait();
-        console.log(tx);
       },
       30 * 1000
     );
@@ -136,26 +137,45 @@ describe('CommandTransferEthCommander', () => {
 
   describe('transferEthByPath', () => {
     beforeEach(() => {
-      command.transferEth = jest.fn().mockImplementation(() => transferTx);
+      // command.transferEth = jest.fn().mockImplementation(() => transferTx);
     });
 
     it('should transfer eth by path', async () => {
       const accounts = command.getAccounts();
-      const amount = '0.1';
+      const amount = '1000';
       const network = 'testnet';
       const provider = command.getProviderWithNetworkConfig(network);
       const transferPath = [0, 1, 2, 0];
 
       const transferEthSpy = jest.spyOn(command, 'transferEth');
-      const tx = await command.transferEthByPath(
-        amount,
-        transferPath,
-        accounts,
-        provider
-      );
-      console.log(tx);
+      await command.transferEthByPath(amount, transferPath, accounts, provider);
 
       expect(transferEthSpy).toHaveBeenCalledTimes(transferPath.length - 1);
+    });
+  });
+
+  describe('computeTransferAmount', () => {
+    it('should compute transfer amount', async () => {
+      const accounts = command.getAccounts();
+      const amount = ethers.utils.parseEther('1000');
+      const from = ethers.utils.computeAddress(accounts[0].privateKey);
+      const provider = command.getProviderWithNetworkConfig('testnet');
+      const maxFee = ethers.utils.parseEther('0.00021');
+      const transferAmount = await command.computeTransferAmount(
+        from,
+        amount,
+        maxFee,
+        provider
+      );
+      expect(amount.gt(transferAmount)).toBeTruthy();
+    });
+
+    it('getTransferGasFee', async () => {
+      const accounts = command.getAccounts();
+      const provider = command.getProviderWithNetworkConfig('testnet');
+
+      const gasFee = await command.getTransferGasFee(provider);
+      expect(gasFee.gt(0)).toBeTruthy();
     });
   });
 });

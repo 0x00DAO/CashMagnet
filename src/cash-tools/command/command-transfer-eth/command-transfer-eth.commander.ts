@@ -1,11 +1,16 @@
 import { Inject } from '@nestjs/common';
-import { Wallet, ethers } from 'ethers';
-import { CommandRunner, Option, SubCommand } from 'nest-commander';
-import { DefaultConfigAccount } from '../../configs/default-config-account.interface';
-import { Assertion } from '../../core/exception/assertion';
-import { WalletService } from '../../ether-wallet/wallet/wallet.service';
-import { ConfigService } from '../../utils/config/config.service';
-
+import { BigNumber, Wallet, ethers } from 'ethers';
+import {
+  CommandRunner,
+  InquirerService,
+  Option,
+  SubCommand,
+} from 'nest-commander';
+import { DefaultConfigAccount } from '../../../configs/default-config-account.interface';
+import { Assertion } from '../../../core/exception/assertion';
+import { WalletService } from '../../../ether-wallet/wallet/wallet.service';
+import { ConfigService } from '../../../utils/config/config.service';
+import { ConsoleLoggerService } from '../../../utils/console-logger/console-logger.service';
 //default: npx ts-node src/main.ts cash-tools transfer-eth 0.1 --from 0 --to 1
 //default.2: npx ts-node src/main.ts cash-tools transfer-eth 0.1 --transfer-path 0,1
 @SubCommand({
@@ -20,7 +25,22 @@ export class CommandTransferEthCommander extends CommandRunner {
   @Inject()
   private readonly configService: ConfigService;
 
+  @Inject()
+  private readonly logger: ConsoleLoggerService;
+
+  @Inject()
+  private readonly inquirer: InquirerService;
+
+  constructor() {
+    super();
+  }
+
   private readonly optionTransferPath: number[] = [0, 1];
+
+  /**
+   * current transfer max gas fee
+   */
+  private currentTransferMaxGasFee: BigNumber;
 
   async run(inputs: string[], options: Record<string, any>): Promise<void> {
     const network = options.network;
@@ -40,14 +60,35 @@ export class CommandTransferEthCommander extends CommandRunner {
       );
       transferPath = [fromIndex, toIndex];
     }
-
-    console.log(`amount: ${amount}`);
-    console.log(
+    if (!this.currentTransferMaxGasFee) {
+      this.currentTransferMaxGasFee = await this.getTransferGasFee(provider);
+    }
+    this.logger.log(`amount: ${amount}`);
+    this.logger.log(
       `transfer path: ${transferPath}, count: ${transferPath.length - 1}`
     );
-    console.log(`begin transfer eth ...`);
+    this.logger.log(
+      `current transfer max gas fee: ${ethers.utils.formatEther(
+        this.currentTransferMaxGasFee
+      )}, total: ${ethers.utils.formatEther(
+        this.currentTransferMaxGasFee.mul(transferPath.length - 1)
+      )}`
+    );
+
+    if (!options.silence) {
+      const confirm = await this.inquirer.prompt(
+        'continue-confirm-questions',
+        undefined
+      );
+      if (!confirm.confirm) {
+        this.logger.log(`🍺 transfer eth canceled!`);
+        return;
+      }
+    }
+
+    this.logger.log(`🍺 begin transfer eth ...`);
     await this.transferEthByPath(amount, transferPath, accounts, provider);
-    console.log(`transfer eth done`);
+    this.logger.log(`🍺 transfer eth done!`);
   }
   @Option({
     flags: '--network, --network <name>',
@@ -90,11 +131,19 @@ export class CommandTransferEthCommander extends CommandRunner {
     return transferPath;
   }
 
+  @Option({
+    flags: '--s, --silence',
+    description: 'silence mode',
+  })
+  parseSilence(): boolean {
+    return true;
+  }
+
   getProviderWithNetworkConfig(network?: string): ethers.providers.Provider {
     if (!network) {
       network = this.configService.get<string>('cashTools.defaultNetwork');
     }
-    console.log(`network: ${network}`);
+    this.logger.log(`network: ${network}`);
     const provider = this.walletService.getProviderWithNetworkConfig(network);
     return provider;
   }
@@ -136,8 +185,10 @@ export class CommandTransferEthCommander extends CommandRunner {
     );
 
     for (let i = 0; i < transferPath.length - 1; i++) {
-      const step = `[${i + 1}/${transferPath.length - 1}]`;
-      console.log(`transfer eth ${step}...`);
+      const logPrefix = `[${i + 1}/${transferPath.length - 1}]`;
+      this.logger.logPrefix = logPrefix;
+      this.logger.log(`transfer ETH begin...`);
+
       const fromIndex = transferPath[i];
       const toIndex = transferPath[i + 1];
 
@@ -148,12 +199,15 @@ export class CommandTransferEthCommander extends CommandRunner {
         fromPrivateKey,
         toPrivateKey,
         ethers.utils.parseEther(amount),
-        provider
+        provider,
+        this.currentTransferMaxGasFee
       );
-      this.logTransaction(tx, step);
-      console.log(`${step} waiting for tx confirm...`);
-      await tx.wait();
-      console.log(`${step} done.`);
+      this.logger.log(`waiting for tx:${tx.hash} confirm...`);
+      const txReceipt = await tx.wait();
+      this.logTransaction(tx, txReceipt);
+      this.logger.log(`done.\n`);
+
+      this.logger.clearLogPrefix();
     }
   }
 
@@ -161,34 +215,105 @@ export class CommandTransferEthCommander extends CommandRunner {
     fromPrivateKey: string,
     toPrivateKey: string,
     amount: ethers.BigNumber,
-    provider: ethers.providers.Provider
+    provider: ethers.providers.Provider,
+    maxGasFee?: ethers.BigNumber
   ): Promise<ethers.providers.TransactionResponse> {
     const fromSigner = new Wallet(fromPrivateKey, provider);
     const to = ethers.utils.computeAddress(toPrivateKey);
 
-    console.log(`Transfer Amount: ${ethers.utils.formatEther(amount)}`);
-    console.log(`Transfer From: ${fromSigner.address} [${fromPrivateKey}]`);
-    console.log(`Transfer To: ${to} [${toPrivateKey}] `);
+    if (!maxGasFee) {
+      maxGasFee = await this.getTransferGasFee(provider);
+    }
 
-    console.log(`Begin transfer...`);
+    const transferAmount = await this.computeTransferAmount(
+      fromSigner.address,
+      amount,
+      maxGasFee,
+      provider
+    );
+
+    Assertion.isTrue(
+      transferAmount.gt(maxGasFee),
+      null,
+      `transfer amount must be greater than max gas fee :${ethers.utils.formatEther(
+        maxGasFee
+      )}`
+    );
+
+    this.logger.log(
+      `transfer amount: ${ethers.utils.formatEther(transferAmount)}`
+    );
+    this.logger.log(`transfer from: ${fromSigner.address} [${fromPrivateKey}]`);
+    this.logger.log(`transfer to: ${to} [${toPrivateKey}] `);
+    this.logger.log(`begin sendTransaction...`);
 
     return fromSigner.sendTransaction({
       to,
-      value: amount,
+      value: transferAmount,
     });
+  }
+
+  async computeTransferAmount(
+    from: string,
+    amount: ethers.BigNumber,
+    maxFee: ethers.BigNumber,
+    provider: ethers.providers.Provider
+  ) {
+    //get balance
+    const fromBalance = await provider.getBalance(from);
+    if (fromBalance.lte(amount)) {
+      //compute max fee
+      return fromBalance.sub(maxFee);
+    }
+    return amount;
+  }
+
+  /**
+   * get transfer gas fee
+   */
+  async getTransferGasFee(
+    provider: ethers.providers.Provider
+  ): Promise<ethers.BigNumber> {
+    //get gas price
+    const gasFeeData = await provider.getFeeData();
+    const gasPrice = gasFeeData.maxFeePerGas ?? gasFeeData.gasPrice;
+    const gasMaxPriorityFeePerGas =
+      gasFeeData.maxPriorityFeePerGas ?? BigNumber.from(0);
+
+    const amount = ethers.utils.parseEther('1');
+    //compute gas limit
+    // const gasLimit = await provider.estimateGas({
+    //   from,
+    //   to,
+    //   value: amount,
+    // });
+    const gasLimit = BigNumber.from(21000);
+
+    //compute max fee
+    const maxFee = gasPrice
+      .mul(gasLimit)
+      .add(gasMaxPriorityFeePerGas.mul(gasLimit));
+
+    return maxFee;
   }
 
   async logTransaction(
     tx: ethers.providers.TransactionResponse,
-    logPrefix: string = 'step',
+    txReceipt: ethers.providers.TransactionReceipt,
     network?: string
   ) {
     if (!network) {
       network = this.configService.get<string>('cashTools.defaultNetwork');
     }
     const provider = this.walletService.getProviderConfig(network);
-    const etherscanUrl = provider.blockExplorerUrl;
-    console.log(`${logPrefix} Transfer tx: ${etherscanUrl}/tx/${tx.hash}`);
+    let etherscanUrl = provider.blockExplorerUrl;
+    //if end with /, remove it
+    if (etherscanUrl.endsWith('/')) {
+      etherscanUrl = etherscanUrl.slice(0, etherscanUrl.length - 1);
+    }
+    this.logger.log(`transfer scan: ${etherscanUrl}/tx/${tx.hash}`);
+    const gasFee = txReceipt.gasUsed.mul(txReceipt.effectiveGasPrice);
+    this.logger.log(`transfer gas fee: ${ethers.utils.formatEther(gasFee)}`);
   }
 
   getTransferPathIndex(path: string): number[] {

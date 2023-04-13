@@ -15,6 +15,7 @@
 # local-{deployment}.EXT
 # local-{deployment}-{instance}.EXT
 # (Finally, custom environment variables can override all files)
+# see: https://github.com/node-config/node-config/wiki/Configuration-Files
 
 name: Magnet
 description: Configuration for Cash Magnet
