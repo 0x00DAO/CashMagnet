@@ -233,6 +233,37 @@ export class CommandTransferEthCommander extends CommandRunner {
     return amount;
   }
 
+  /**
+   * get transfer gas fee
+   */
+  async getTransferGasFee(
+    from: string,
+    to: string,
+    provider: ethers.providers.Provider
+  ): Promise<ethers.BigNumber> {
+    //get gas price
+    const gasFeeData = await provider.getFeeData();
+    const gasPrice = gasFeeData.maxFeePerGas ?? gasFeeData.gasPrice;
+    const gasMaxPriorityFeePerGas =
+      gasFeeData.maxPriorityFeePerGas ?? BigNumber.from(0);
+
+    const amount = ethers.utils.parseEther('1');
+    //compute gas limit
+    const gasLimit = await provider.estimateGas({
+      from,
+      to,
+      value: amount,
+    });
+
+    this.logger.log(`gasLimit: ${gasLimit.toString()}`);
+    //compute max fee
+    const maxFee = gasPrice
+      .mul(gasLimit)
+      .add(gasMaxPriorityFeePerGas.mul(gasLimit));
+
+    return maxFee;
+  }
+
   async logTransaction(
     tx: ethers.providers.TransactionResponse,
     txReceipt: ethers.providers.TransactionReceipt,
