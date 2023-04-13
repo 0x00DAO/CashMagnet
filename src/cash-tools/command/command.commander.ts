@@ -1,7 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { Command, CommandRunner } from 'nest-commander';
 import { CommandGetBalanceCommander } from './command-get-balance.commander';
-import { CommandTransferEthCommander } from './command-transfer-eth.commander';
+import { CommandTransferEthCommander } from './command-transfer-eth/command-transfer-eth.commander';
 
 @Command({
   name: 'cash-tools',

@@ -6,12 +6,11 @@ import {
   Option,
   SubCommand,
 } from 'nest-commander';
-import { DefaultConfigAccount } from '../../configs/default-config-account.interface';
-import { Assertion } from '../../core/exception/assertion';
-import { WalletService } from '../../ether-wallet/wallet/wallet.service';
-import { ConfigService } from '../../utils/config/config.service';
-import { ConsoleLoggerService } from '../../utils/console-logger/console-logger.service';
-
+import { DefaultConfigAccount } from '../../../configs/default-config-account.interface';
+import { Assertion } from '../../../core/exception/assertion';
+import { WalletService } from '../../../ether-wallet/wallet/wallet.service';
+import { ConfigService } from '../../../utils/config/config.service';
+import { ConsoleLoggerService } from '../../../utils/console-logger/console-logger.service';
 //default: npx ts-node src/main.ts cash-tools transfer-eth 0.1 --from 0 --to 1
 //default.2: npx ts-node src/main.ts cash-tools transfer-eth 0.1 --transfer-path 0,1
 @SubCommand({
@@ -31,6 +30,10 @@ export class CommandTransferEthCommander extends CommandRunner {
 
   @Inject()
   private readonly inquirer: InquirerService;
+
+  constructor() {
+    super();
+  }
 
   private readonly optionTransferPath: number[] = [0, 1];
 
@@ -71,6 +74,17 @@ export class CommandTransferEthCommander extends CommandRunner {
         this.currentTransferMaxGasFee.mul(transferPath.length - 1)
       )}`
     );
+
+    if (!options.silence) {
+      const confirm = await this.inquirer.prompt(
+        'continue-confirm-questions',
+        undefined
+      );
+      if (!confirm.confirm) {
+        this.logger.log(`🍺 transfer eth canceled!`);
+        return;
+      }
+    }
 
     this.logger.log(`🍺 begin transfer eth ...`);
     await this.transferEthByPath(amount, transferPath, accounts, provider);
@@ -115,6 +129,14 @@ export class CommandTransferEthCommander extends CommandRunner {
     this.optionTransferPath.splice(0, this.optionTransferPath.length);
     this.optionTransferPath.push(...transferPath);
     return transferPath;
+  }
+
+  @Option({
+    flags: '--s, --silence',
+    description: 'silence mode',
+  })
+  parseSilence(): boolean {
+    return true;
   }
 
   getProviderWithNetworkConfig(network?: string): ethers.providers.Provider {

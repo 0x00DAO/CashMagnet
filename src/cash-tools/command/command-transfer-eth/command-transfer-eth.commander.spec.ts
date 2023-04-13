@@ -1,8 +1,8 @@
 import { TestingModule } from '@nestjs/testing';
 import { BigNumber, ethers } from 'ethers';
 import { CommandTestFactory } from 'nest-commander-testing';
+import { CommandModule } from '../command.module';
 import { CommandTransferEthCommander } from './command-transfer-eth.commander';
-import { CommandModule } from './command.module';
 
 const transferTx = {
   nonce: 0,
@@ -71,6 +71,7 @@ describe('CommandTransferEthCommander', () => {
         'cash-tools',
         'transfer-eth',
         '0.1',
+        '--s',
       ]);
 
       expect(spawnSpy).toHaveBeenCalledTimes(1);
@@ -87,6 +88,7 @@ describe('CommandTransferEthCommander', () => {
         '0.1',
         '--transfer-path',
         '0,1,0',
+        '--s',
       ]);
 
       expect(spawnSpy).toHaveBeenCalledTimes(1);
