@@ -5,6 +5,7 @@ import { DefaultConfigAccount } from '../../configs/default-config-account.inter
 import { Assertion } from '../../core/exception/assertion';
 import { WalletService } from '../../ether-wallet/wallet/wallet.service';
 import { ConfigService } from '../../utils/config/config.service';
+import { ConsoleLoggerService } from '../../utils/console-logger/console-logger.service';
 
 //default: npx ts-node src/main.ts cash-tools transfer-eth 0.1 --from 0 --to 1
 //default.2: npx ts-node src/main.ts cash-tools transfer-eth 0.1 --transfer-path 0,1
@@ -20,9 +21,10 @@ export class CommandTransferEthCommander extends CommandRunner {
   @Inject()
   private readonly configService: ConfigService;
 
-  private readonly optionTransferPath: number[] = [0, 1];
+  @Inject()
+  private readonly logger: ConsoleLoggerService;
 
-  private logPrefix = null;
+  private readonly optionTransferPath: number[] = [0, 1];
 
   async run(inputs: string[], options: Record<string, any>): Promise<void> {
     const network = options.network;
@@ -43,13 +45,13 @@ export class CommandTransferEthCommander extends CommandRunner {
       transferPath = [fromIndex, toIndex];
     }
 
-    console.log(`amount: ${amount}`);
-    console.log(
+    this.logger.log(`amount: ${amount}`);
+    this.logger.log(
       `transfer path: ${transferPath}, count: ${transferPath.length - 1}`
     );
-    console.log(`begin transfer eth ...`);
+    this.logger.log(`🍺 begin transfer eth ...`);
     await this.transferEthByPath(amount, transferPath, accounts, provider);
-    console.log(`transfer eth done`);
+    this.logger.log(`🍺 transfer eth done!`);
   }
   @Option({
     flags: '--network, --network <name>',
@@ -96,7 +98,7 @@ export class CommandTransferEthCommander extends CommandRunner {
     if (!network) {
       network = this.configService.get<string>('cashTools.defaultNetwork');
     }
-    console.log(`network: ${network}`);
+    this.logger.log(`network: ${network}`);
     const provider = this.walletService.getProviderWithNetworkConfig(network);
     return provider;
   }
@@ -138,8 +140,10 @@ export class CommandTransferEthCommander extends CommandRunner {
     );
 
     for (let i = 0; i < transferPath.length - 1; i++) {
-      this.logPrefix = `[${i + 1}/${transferPath.length - 1}]`;
-      this.log(`transfer eth ...`);
+      const logPrefix = `[${i + 1}/${transferPath.length - 1}]`;
+      this.logger.logPrefix = logPrefix;
+      this.logger.log(`transfer ETH begin...`);
+
       const fromIndex = transferPath[i];
       const toIndex = transferPath[i + 1];
 
@@ -152,12 +156,13 @@ export class CommandTransferEthCommander extends CommandRunner {
         ethers.utils.parseEther(amount),
         provider
       );
-      this.log(`waiting for tx:${tx.hash} confirm...`);
+      this.logger.log(`waiting for tx:${tx.hash} confirm...`);
       const txReceipt = await tx.wait();
-      this.logTransaction(tx, txReceipt, this.logPrefix);
-      console.log(this.logPrefix, `done.`);
+      this.logTransaction(tx, txReceipt);
+      this.logger.log(`done.\n`);
+
+      this.logger.clearLogPrefix();
     }
-    this.logPrefix = null;
   }
 
   async transferEth(
@@ -182,17 +187,12 @@ export class CommandTransferEthCommander extends CommandRunner {
       `transfer amount must be greater than 0`
     );
 
-    console.log(
-      this.logPrefix,
-      `Transfer Amount: ${ethers.utils.formatEther(transferAmount)}`
+    this.logger.log(
+      `transfer amount: ${ethers.utils.formatEther(transferAmount)}`
     );
-    console.log(
-      this.logPrefix,
-      `Transfer From: ${fromSigner.address} [${fromPrivateKey}]`
-    );
-    console.log(this.logPrefix, `Transfer To: ${to} [${toPrivateKey}] `);
-
-    console.log(this.logPrefix, `Begin transfer...`);
+    this.logger.log(`transfer from: ${fromSigner.address} [${fromPrivateKey}]`);
+    this.logger.log(`transfer to: ${to} [${toPrivateKey}] `);
+    this.logger.log(`begin sendTransaction...`);
 
     return fromSigner.sendTransaction({
       to,
@@ -222,7 +222,7 @@ export class CommandTransferEthCommander extends CommandRunner {
         value: amount,
       });
 
-      console.log(`gasLimit: ${gasLimit.toString()}`);
+      this.logger.log(`gasLimit: ${gasLimit.toString()}`);
       //compute max fee
       const maxFee = gasPrice
         .mul(gasLimit)
@@ -232,18 +232,10 @@ export class CommandTransferEthCommander extends CommandRunner {
     }
     return amount;
   }
-  log(message?: any, ...optionalParams: any[]): void {
-    if (this.logPrefix) {
-      console.log(this.logPrefix, message, ...optionalParams);
-    } else {
-      console.log(message, ...optionalParams);
-    }
-  }
 
   async logTransaction(
     tx: ethers.providers.TransactionResponse,
     txReceipt: ethers.providers.TransactionReceipt,
-    logPrefix: string = 'step',
     network?: string
   ) {
     if (!network) {
@@ -255,12 +247,9 @@ export class CommandTransferEthCommander extends CommandRunner {
     if (etherscanUrl.endsWith('/')) {
       etherscanUrl = etherscanUrl.slice(0, etherscanUrl.length - 1);
     }
-    console.log(logPrefix, `Transfer tx: ${etherscanUrl}/tx/${tx.hash}`);
+    this.logger.log(`transfer scan: ${etherscanUrl}/tx/${tx.hash}`);
     const gasFee = txReceipt.gasUsed.mul(txReceipt.effectiveGasPrice);
-    console.log(
-      logPrefix,
-      `Transfer tx gas fee: ${ethers.utils.formatEther(gasFee)}`
-    );
+    this.logger.log(`transfer gas fee: ${ethers.utils.formatEther(gasFee)}`);
   }
 
   getTransferPathIndex(path: string): number[] {
