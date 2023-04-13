@@ -170,11 +170,9 @@ describe('CommandTransferEthCommander', () => {
 
     it('getTransferGasFee', async () => {
       const accounts = command.getAccounts();
-      const from = ethers.utils.computeAddress(accounts[0].privateKey);
-      const to = ethers.utils.computeAddress(accounts[1].privateKey);
       const provider = command.getProviderWithNetworkConfig('testnet');
 
-      const gasFee = await command.getTransferGasFee(from, to, provider);
+      const gasFee = await command.getTransferGasFee(provider);
       expect(gasFee.gt(0)).toBeTruthy();
     });
   });

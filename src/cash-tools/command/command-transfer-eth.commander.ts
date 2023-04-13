@@ -49,10 +49,19 @@ export class CommandTransferEthCommander extends CommandRunner {
       );
       transferPath = [fromIndex, toIndex];
     }
-
+    if (!this.currentTransferMaxGasFee) {
+      this.currentTransferMaxGasFee = await this.getTransferGasFee(provider);
+    }
     this.logger.log(`amount: ${amount}`);
     this.logger.log(
       `transfer path: ${transferPath}, count: ${transferPath.length - 1}`
+    );
+    this.logger.log(
+      `current transfer max gas fee: ${ethers.utils.formatEther(
+        this.currentTransferMaxGasFee
+      )}, total: ${ethers.utils.formatEther(
+        this.currentTransferMaxGasFee.mul(transferPath.length - 1)
+      )}`
     );
     this.logger.log(`🍺 begin transfer eth ...`);
     await this.transferEthByPath(amount, transferPath, accounts, provider);
@@ -179,14 +188,6 @@ export class CommandTransferEthCommander extends CommandRunner {
     const fromSigner = new Wallet(fromPrivateKey, provider);
     const to = ethers.utils.computeAddress(toPrivateKey);
 
-    if (!this.currentTransferMaxGasFee) {
-      this.currentTransferMaxGasFee = await this.getTransferGasFee(
-        fromSigner.address,
-        to,
-        provider
-      );
-    }
-
     const transferAmount = await this.computeTransferAmount(
       fromSigner.address,
       amount,
@@ -234,8 +235,6 @@ export class CommandTransferEthCommander extends CommandRunner {
    * get transfer gas fee
    */
   async getTransferGasFee(
-    from: string,
-    to: string,
     provider: ethers.providers.Provider
   ): Promise<ethers.BigNumber> {
     //get gas price
@@ -246,13 +245,13 @@ export class CommandTransferEthCommander extends CommandRunner {
 
     const amount = ethers.utils.parseEther('1');
     //compute gas limit
-    const gasLimit = await provider.estimateGas({
-      from,
-      to,
-      value: amount,
-    });
+    // const gasLimit = await provider.estimateGas({
+    //   from,
+    //   to,
+    //   value: amount,
+    // });
+    const gasLimit = BigNumber.from(21000);
 
-    this.logger.log(`gasLimit: ${gasLimit.toString()}`);
     //compute max fee
     const maxFee = gasPrice
       .mul(gasLimit)
