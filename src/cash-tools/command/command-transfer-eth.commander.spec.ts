@@ -42,7 +42,7 @@ describe('CommandTransferEthCommander', () => {
 
   describe('run', () => {
     beforeEach(() => {
-      command.transferEth = jest.fn().mockImplementation(() => transferTx);
+      // command.transferEth = jest.fn().mockImplementation(() => transferTx);
     });
     it('should call the "run" method', async () => {
       const spawnSpy = jest.spyOn(command, 'run');
