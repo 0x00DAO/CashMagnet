@@ -17,3 +17,7 @@
 ### 0.1.0.20230411.1
 
 1. support transfer path command, eg:`npx ts-node ./src/main.ts cash-tools transfer-path 0.1 --transfer-path 0,1`
+
+### 0.1.0.20230413.1
+
+1. optimize transfer log format
