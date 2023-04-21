@@ -39,6 +39,8 @@ Here are some use cases that you can refer to them to use CashMagnet.
 
 ### [Case 1](wiki/UseCase.md#case-1-i-have-too-many-private-key-wallets-i-cant-remember-them-what-should-i-do): I have too many private key wallets, I can't remember them, what should I do?
 
+### [Case 2](wiki/UseCase.md#case-2-coming-soon): I want to interact on the chain and receive airdrop rewards, what should I do?
+
 [All case in here!](wiki/UseCase.md)
 
 ## Command List
