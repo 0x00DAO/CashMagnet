@@ -37,7 +37,9 @@ $ node dist/main.js help
 
 Here are some use cases that you can refer to them to use CashMagnet.
 
-Link: [Use Case](wiki/UseCase.md)
+### [Case 1](wiki/UseCase.md#case-1-i-have-too-many-private-key-wallets-i-cant-remember-them-what-should-i-do): I have too many private key wallets, I can't remember them, what should I do?
+
+[All case in here!](wiki/UseCase.md)
 
 ## Command List
 
