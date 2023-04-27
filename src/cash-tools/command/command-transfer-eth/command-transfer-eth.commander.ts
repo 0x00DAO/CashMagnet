@@ -91,7 +91,11 @@ export class CommandTransferEthCommander extends CommandRunner {
     }
 
     this.logger.log(`🍺 begin transfer eth ...`);
-    await this.transferEthByPath(amount, transferPath, accounts, provider);
+    const transferAccountPath = await this.computeTransferAccountPath(
+      transferPath,
+      accounts
+    );
+    await this.transferEthByPath(amount, transferAccountPath, provider);
     this.logger.log(`🍺 transfer eth done!`);
   }
   @Option({
@@ -183,6 +187,21 @@ export class CommandTransferEthCommander extends CommandRunner {
     transferPath: number[],
     accounts: { privateKey: string }[]
   ): Promise<{ privateKey: string }[]> {
+    //check transfer path
+    for (const index of transferPath) {
+      Assertion.isTrue(
+        index < accounts.length,
+        null,
+        `transfer path index ${index} is out of range`
+      );
+    }
+
+    const pathValid = this.verifyTransferPath(transferPath);
+    Assertion.isTrue(
+      pathValid,
+      null,
+      `transfer path ${transferPath} is not valid`
+    );
     const transferAccounts: { privateKey: string }[] = [];
     for (const index of transferPath) {
       const account = accounts[index];
@@ -193,35 +212,19 @@ export class CommandTransferEthCommander extends CommandRunner {
 
   async transferEthByPath(
     amount: string,
-    transferPath: number[],
-    accounts: { privateKey: string }[],
+    transferAccounts: { privateKey: string }[],
     provider: ethers.providers.Provider
   ) {
-    //check transfer path
-    for (const index of transferPath) {
-      Assertion.isTrue(
-        index < accounts.length,
-        null,
-        `transfer path index ${index} is out of range`
-      );
-    }
-    const pathValid = this.verifyTransferPath(transferPath);
-    Assertion.isTrue(
-      pathValid,
-      null,
-      `transfer path ${transferPath} is not valid`
-    );
-
-    for (let i = 0; i < transferPath.length - 1; i++) {
-      const logPrefix = `[${i + 1}/${transferPath.length - 1}]`;
+    for (let i = 0; i < transferAccounts.length - 1; i++) {
+      const logPrefix = `[${i + 1}/${transferAccounts.length - 1}]`;
       this.logger.logPrefix = logPrefix;
       this.logger.log(`transfer ETH begin...`);
 
-      const fromIndex = transferPath[i];
-      const toIndex = transferPath[i + 1];
+      const fromAccount = transferAccounts[i];
+      const toAccount = transferAccounts[i + 1];
 
-      const fromPrivateKey = accounts[fromIndex].privateKey;
-      const toPrivateKey = accounts[toIndex].privateKey;
+      const fromPrivateKey = fromAccount.privateKey;
+      const toPrivateKey = toAccount.privateKey;
 
       const tx = await this.transferEth(
         fromPrivateKey,

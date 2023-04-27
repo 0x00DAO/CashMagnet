@@ -157,12 +157,12 @@ describe('CommandTransferEthCommander', () => {
       const amount = '1000';
       const network = 'testnet';
       const provider = command.getProviderWithNetworkConfig(network);
-      const transferPath = [0, 1, 2, 0];
+      const accountPath = [accounts[0], accounts[1], accounts[2], accounts[0]];
 
       const transferEthSpy = jest.spyOn(command, 'transferEth');
-      await command.transferEthByPath(amount, transferPath, accounts, provider);
+      await command.transferEthByPath(amount, accountPath, provider);
 
-      expect(transferEthSpy).toHaveBeenCalledTimes(transferPath.length - 1);
+      expect(transferEthSpy).toHaveBeenCalledTimes(accountPath.length - 1);
     });
   });
 
