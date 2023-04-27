@@ -103,6 +103,13 @@ describe('CommandTransferEthCommander', () => {
     });
   });
 
+  describe('getAccountByIndex', () => {
+    it('should return 0', async () => {
+      const account = await command.getAccountByIndex(0);
+      expect(account).toBeDefined();
+    });
+  });
+
   describe('transferEth', () => {
     it(
       'should transfer eth',

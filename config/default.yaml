@@ -107,3 +107,9 @@ accounts:
       password: '123456'
       initialIndex: 0
       count: 10
+
+commands:
+  cashTools:
+    transfer-eth:
+      accountFrom: default
+      accountTo: default
