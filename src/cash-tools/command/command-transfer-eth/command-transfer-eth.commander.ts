@@ -11,6 +11,7 @@ import { Assertion } from '../../../core/exception/assertion';
 import { WalletService } from '../../../ether-wallet/wallet/wallet.service';
 import { ConfigService } from '../../../utils/config/config.service';
 import { ConsoleLoggerService } from '../../../utils/console-logger/console-logger.service';
+import { CommandTransferETHAccountType } from './command-transfer-eth.constants';
 //default: npx ts-node src/main.ts cash-tools transfer-eth 0.1 --from 0 --to 1
 //default.2: npx ts-node src/main.ts cash-tools transfer-eth 0.1 --transfer-path 0,1
 @SubCommand({
@@ -36,6 +37,9 @@ export class CommandTransferEthCommander extends CommandRunner {
   }
 
   private readonly optionTransferPath: number[] = [0, 1];
+
+  private accountType: CommandTransferETHAccountType =
+    CommandTransferETHAccountType.EOA;
 
   /**
    * current transfer max gas fee
@@ -139,6 +143,18 @@ export class CommandTransferEthCommander extends CommandRunner {
     return true;
   }
 
+  @Option({
+    flags: '--a, --account-type <type>',
+    description:
+      'account type [0:EOA, 1:HDWallet], default is 0: EOA, when account type is HDWallet, from must be 0',
+  })
+  parseAccountType(
+    type: CommandTransferETHAccountType
+  ): CommandTransferETHAccountType {
+    this.accountType = type;
+    return type;
+  }
+
   getProviderWithNetworkConfig(network?: string): ethers.providers.Provider {
     if (!network) {
       network = this.configService.get<string>('cashTools.defaultNetwork');
@@ -161,6 +177,18 @@ export class CommandTransferEthCommander extends CommandRunner {
       `only support privateKey account`
     );
     return account.value as { privateKey: string }[];
+  }
+
+  async computeTransferAccountPath(
+    transferPath: number[],
+    accounts: { privateKey: string }[]
+  ): Promise<{ privateKey: string }[]> {
+    const transferAccounts: { privateKey: string }[] = [];
+    for (const index of transferPath) {
+      const account = accounts[index];
+      transferAccounts.push(account);
+    }
+    return transferAccounts;
   }
 
   async transferEthByPath(

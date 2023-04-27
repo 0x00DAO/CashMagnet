@@ -135,6 +135,18 @@ describe('CommandTransferEthCommander', () => {
     });
   });
 
+  describe('computeTransferAccountPath', () => {
+    it('should compute transfer account path', async () => {
+      const accounts = command.getAccounts();
+      const path = [0, 1, 0];
+      const accountPath = await command.computeTransferAccountPath(
+        path,
+        accounts
+      );
+      expect(accountPath).toEqual([accounts[0], accounts[1], accounts[0]]);
+    });
+  });
+
   describe('transferEthByPath', () => {
     beforeEach(() => {
       // command.transferEth = jest.fn().mockImplementation(() => transferTx);
