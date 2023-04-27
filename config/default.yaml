@@ -78,17 +78,17 @@ accounts:
   # name: default
   # type: privateKey
   # value:
-  #   - privateKey: 0xcba99340c0160e56507ea18a54fd123f78c862b08f57f8c9d6a7e21b70dc3d58
-  #   - privateKey: 0xb246aebaaa04370fedd9f496e5f2729572405e75c78639c01b1a56a4807b2e4b
+  #   - privateKey: 0x001
+  #   - privateKey: 0x002
   - name: default
     type: privateKey
     value:
       # address: 0x3f1914C88Dd604FdB78bc193073E192d80D4B3bf
-      - privateKey: '0xcba99340c0160e56507ea18a54fd123f78c862b08f57f8c9d6a7e21b70dc3d58'
+      # - privateKey: '0x00-your private key'
       # address: 0xC2977b39917B1Ca5aB4cD981Ea67Db758aDF187a
-      - privateKey: '0xb246aebaaa04370fedd9f496e5f2729572405e75c78639c01b1a56a4807b2e4b'
+      # - privateKey: '0x01-your private key'
       # address: 0xa28C9ac2C924E262256b070639d27680fD5Fad97
-      - privateKey: '0x39abb131a9318888ba689b28b6b53211fcebe2063aa1c5d2b9a28f667578f31d'
+      # - privateKey: '0x02-your private key'
 
   # 2. Wallets HD Wallet
   # eg:
