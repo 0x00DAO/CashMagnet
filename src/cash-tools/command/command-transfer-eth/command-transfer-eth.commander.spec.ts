@@ -199,9 +199,16 @@ describe('CommandTransferEthCommander', () => {
   });
 
   describe('getAccountByIndex', () => {
+    it('wallet', () => {
+      const wallet = command.getAccountByIndex(0);
+      expect(wallet).toBeDefined();
+      expect(wallet.privateKey).toStrictEqual(expect.any(String));
+    });
+
     it('hd-wallet', () => {
-      const provider = command.getProviderWithNetworkConfig('testnet');
-      expect(provider).toBeDefined();
+      const wallet = command.getAccountByIndex(1000);
+      expect(wallet).toBeDefined();
+      expect(wallet.privateKey).toStrictEqual(expect.any(String));
     });
   });
 

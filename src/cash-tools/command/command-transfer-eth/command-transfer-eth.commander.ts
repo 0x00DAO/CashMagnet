@@ -171,7 +171,7 @@ export class CommandTransferEthCommander extends CommandRunner {
     return provider;
   }
 
-  async getAccountByIndex(index: number): Promise<{ privateKey: string }> {
+  getAccountByIndex(index: number): WalletWithPrivateKey {
     const commandConfig = this.configService.get<any>(
       'commands.cashTools.transfer-eth'
     );
@@ -179,46 +179,13 @@ export class CommandTransferEthCommander extends CommandRunner {
     const accountFrom = commandConfig.accountFrom ?? 'default';
     const accountTo = commandConfig.accountTo ?? 'default';
 
-    const accountsConfig =
-      this.configService.get<DefaultConfigAccount[]>('accounts');
-
     // only index is 0, use accountFrom
     if (index === 0) {
-      const account = accountsConfig.find((a) => a.name === accountFrom);
-      Assertion.isNotNil(account, null, `account:${accountFrom} not found`);
-      Assertion.isTrue(
-        account.type === 'privateKey',
-        null,
-        `only support privateKey account`
-      );
-      return account.value[index] as { privateKey: string };
+      return this.getAccountByIndexAndConfig(index, accountFrom);
     }
 
     // index is not 0, use accountTo
-    const accountToConfig = accountsConfig.find((a) => a.name === accountTo);
-    Assertion.isNotNil(accountToConfig, null, `account:${accountTo} not found`);
-
-    if (accountToConfig.type === 'privateKey') {
-      Assertion.isTrue(
-        accountToConfig.value.length > index,
-        null,
-        `account:${accountTo} not found`
-      );
-      return accountToConfig.value[index] as { privateKey: string };
-    } else if (accountToConfig.type === 'hdWallet') {
-      const hdWallet = accountToConfig.value as {
-        extendedKey: string;
-        password: string;
-        initialIndex: number;
-        count: number;
-      };
-      //TODO: support hdWallet
-      Assertion.isTrue(false, null, `account:${accountTo} not found`);
-    } else {
-      Assertion.isTrue(false, null, `account:${accountTo} not found`);
-    }
-
-    return null;
+    return this.getAccountByIndexAndConfig(index, accountTo);
   }
 
   getAccountByIndexAndConfig(
@@ -236,7 +203,7 @@ export class CommandTransferEthCommander extends CommandRunner {
         Assertion.isTrue(
           accountConfig.value.length > index,
           null,
-          `account:${configName} not found`
+          `account:${configName}, index:${index} not found`
         );
         return accountConfig.value[index] as { privateKey: string };
       case 'hdWallet':
