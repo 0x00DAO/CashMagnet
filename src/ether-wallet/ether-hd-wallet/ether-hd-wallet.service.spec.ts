@@ -29,10 +29,13 @@ describe('EtherHdWalletService', () => {
     });
   });
 
-  // describe('createHDWalletFromExtendKey', () => {
-  //   it('success', () => {
-  //     const hdWallet = Wallet.createRandom();
-  //     const wallet = service.createHDWalletFromExtendKey(hdWallet.extendedKey);
-  //   });
-  // });
+  describe('createHDWalletFromExtendKey', () => {
+    it('success', () => {
+      const hdWallet = service.createHDWallet();
+      const wallet = service.createHDWalletFromExtendKey(hdWallet.extendedKey);
+
+      expect(wallet).toBeDefined();
+      expect(wallet.address).toEqual(hdWallet.address);
+    });
+  });
 });
