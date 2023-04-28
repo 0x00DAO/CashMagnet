@@ -1,22 +1,26 @@
-import { Logger } from '@nestjs/common';
-import { ethers, utils } from 'ethers';
+import { Inject, Logger } from '@nestjs/common';
 import { HDNode } from 'ethers/lib/utils';
 import { CommandRunner, SubCommand } from 'nest-commander';
+import { EtherHdWalletService } from '../ether-wallet/ether-hd-wallet/ether-hd-wallet.service';
 import { AesEncryption } from '../utils/encryption/aes.encryption';
 
 @SubCommand({ name: 'create', arguments: '<password>' })
 export class HdWalletCreateCommander extends CommandRunner {
   private readonly logger: Logger = new Logger(HdWalletCreateCommander.name);
   private readonly encrypt = new AesEncryption();
+
+  @Inject()
+  private readonly etherHdWalletService: EtherHdWalletService;
+
   async run(inputs: string[], options: Record<string, any>): Promise<void> {
     const password = inputs[0];
     const { wallet } = this.createHDWallet();
 
-    const extendedKeyEncrypt = this.encrypt.encryptWithSaltString(
-      wallet.extendedKey,
-      password,
-      password
-    );
+    const extendedKeyEncrypt =
+      this.etherHdWalletService.encryptHDWalletExtendedKey(
+        wallet.extendedKey,
+        password
+      );
 
     const logs: string[] = [];
 
@@ -37,10 +41,8 @@ export class HdWalletCreateCommander extends CommandRunner {
   createHDWallet(): {
     wallet: HDNode;
   } {
-    // 生成随机助记词
-    const mnemonic = utils.entropyToMnemonic(utils.randomBytes(32));
     return {
-      wallet: ethers.utils.HDNode.fromMnemonic(mnemonic),
+      wallet: this.etherHdWalletService.createHDWallet(),
     };
   }
 }
