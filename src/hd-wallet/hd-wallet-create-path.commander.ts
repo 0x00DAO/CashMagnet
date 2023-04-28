@@ -2,7 +2,6 @@ import { Inject, Logger } from '@nestjs/common';
 import { HDNode } from 'ethers/lib/utils';
 import { CommandRunner, Option, SubCommand } from 'nest-commander';
 import { EtherHdWalletService } from '../ether-wallet/ether-hd-wallet/ether-hd-wallet.service';
-import { AesEncryption } from '../utils/encryption/aes.encryption';
 
 @SubCommand({ name: 'create-path', arguments: '<extendedKey>' })
 export class HdWalletCreatePathCommander extends CommandRunner {
@@ -12,8 +11,6 @@ export class HdWalletCreatePathCommander extends CommandRunner {
 
   @Inject()
   private readonly etherHdWalletService: EtherHdWalletService;
-
-  private readonly encrypt = new AesEncryption();
 
   @Option({
     flags: '-a, --account-id <index>',
@@ -70,9 +67,8 @@ export class HdWalletCreatePathCommander extends CommandRunner {
 
     if (password) {
       logs.push(
-        `extendedKeyEncrypt: ${this.encrypt.encryptWithSaltString(
+        `extendedKeyEncrypt: ${this.etherHdWalletService.encryptHDWalletExtendedKey(
           wallet.extendedKey,
-          password,
           password
         )}`
       );
@@ -85,17 +81,6 @@ export class HdWalletCreatePathCommander extends CommandRunner {
     console.log(logs.join('\n'));
   }
 
-  decodeExtendedKey(extendedKey: string, password: string): string {
-    if (!password) {
-      return extendedKey;
-    }
-    const { decrypted } = this.encrypt.decryptWithSaltString(
-      extendedKey,
-      password
-    );
-    return decrypted;
-  }
-
   async createPathWallet(
     extendedKey: string,
     accountId: number,
@@ -103,22 +88,11 @@ export class HdWalletCreatePathCommander extends CommandRunner {
   ): Promise<{ wallet: HDNode; path: string }> {
     const wallet =
       this.etherHdWalletService.createHDWalletFromExtendKey(extendedKey);
-    let path = this.getAccountBasePath(accountId) + '/' + accountIndex;
-    if (wallet.depth !== 0) {
-      path = accountIndex.toString();
-    }
-    return {
-      wallet: wallet.derivePath(path),
-      path,
-    };
-  }
 
-  /**
-   *
-   * @param index
-   * @returns
-   */
-  getAccountBasePath(index: number): string {
-    return `m/44'/60'/${index}'/0`;
+    return this.etherHdWalletService.createHDWalletByPath(
+      wallet,
+      accountId,
+      accountIndex
+    );
   }
 }
