@@ -51,4 +51,33 @@ export class EtherHdWalletService {
     );
     return this.createHDWalletFromExtendKey(decrypted);
   }
+
+  async createHDWalletByPath(
+    hdWallet: HDNode,
+    accountId: number,
+    accountIndex: number
+  ): Promise<{ wallet: HDNode; path: string }> {
+    const wallet = hdWallet;
+    let path = this.getAccountBasePath(accountId, accountIndex);
+    if (wallet.depth !== 0) {
+      path = accountIndex.toString();
+    }
+    return {
+      wallet: wallet.derivePath(path),
+      path,
+    };
+  }
+
+  /**
+   *
+   * @param index
+   * @returns
+   */
+  getAccountBasePath(accountId: number, accountIndex?: number): string {
+    let basePath = `m/44'/60'/${accountId}'/0`;
+    if (accountIndex !== undefined) {
+      basePath += `/${accountIndex}`;
+    }
+    return basePath;
+  }
 }

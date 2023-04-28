@@ -58,4 +58,16 @@ describe('EtherHdWalletService', () => {
       expect(wallet.address).toEqual(hdWallet.address);
     });
   });
+
+  describe('getAccountBasePath', () => {
+    it.each([
+      [0, 0, "m/44'/60'/0'/0/0"],
+      [0, 1, "m/44'/60'/0'/0/1"],
+      [0, undefined, "m/44'/60'/0'/0"],
+      [1, 0, "m/44'/60'/1'/0/0"],
+    ])('success', (accountIndex, addressIndex, expected) => {
+      const path = service.getAccountBasePath(accountIndex, addressIndex);
+      expect(path).toEqual(expected);
+    });
+  });
 });
