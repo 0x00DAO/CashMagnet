@@ -6,7 +6,10 @@ import {
   Option,
   SubCommand,
 } from 'nest-commander';
-import { DefaultConfigAccount } from '../../../configs/default-config-account.interface';
+import {
+  DefaultConfigAccount,
+  WalletWithPrivateKey,
+} from '../../../configs/default-config-account.interface';
 import { Assertion } from '../../../core/exception/assertion';
 import { WalletService } from '../../../ether-wallet/wallet/wallet.service';
 import { ConfigService } from '../../../utils/config/config.service';
@@ -179,6 +182,7 @@ export class CommandTransferEthCommander extends CommandRunner {
     const accountsConfig =
       this.configService.get<DefaultConfigAccount[]>('accounts');
 
+    // only index is 0, use accountFrom
     if (index === 0) {
       const account = accountsConfig.find((a) => a.name === accountFrom);
       Assertion.isNotNil(account, null, `account:${accountFrom} not found`);
@@ -190,8 +194,10 @@ export class CommandTransferEthCommander extends CommandRunner {
       return account.value[index] as { privateKey: string };
     }
 
+    // index is not 0, use accountTo
     const accountToConfig = accountsConfig.find((a) => a.name === accountTo);
     Assertion.isNotNil(accountToConfig, null, `account:${accountTo} not found`);
+
     if (accountToConfig.type === 'privateKey') {
       Assertion.isTrue(
         accountToConfig.value.length > index,
@@ -213,6 +219,36 @@ export class CommandTransferEthCommander extends CommandRunner {
     }
 
     return null;
+  }
+
+  getAccountByIndexAndConfig(
+    index: number,
+    configName: string
+  ): WalletWithPrivateKey {
+    const accountsConfig =
+      this.configService.get<DefaultConfigAccount[]>('accounts');
+    const accountConfig = accountsConfig.find((a) => a.name === configName);
+    Assertion.isNotNil(accountConfig, null, `account:${configName} not found`);
+
+    if (accountConfig.type === 'privateKey') {
+      Assertion.isTrue(
+        accountConfig.value.length > index,
+        null,
+        `account:${configName} not found`
+      );
+      return accountConfig.value[index] as { privateKey: string };
+    } else if (accountConfig.type === 'hdWallet') {
+      const hdWallet = accountConfig.value as {
+        extendedKey: string;
+        password: string;
+        initialIndex: number;
+        count: number;
+      };
+      //TODO: support hdWallet
+      Assertion.isTrue(false, null, `account:${configName} not found`);
+    } else {
+      Assertion.isTrue(false, null, `account:${configName} not found`);
+    }
   }
 
   getAccounts(): { privateKey: string }[] {

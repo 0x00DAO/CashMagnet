@@ -197,4 +197,25 @@ describe('CommandTransferEthCommander', () => {
       expect(gasFee.gt(0)).toBeTruthy();
     });
   });
+
+  describe('getAccountByIndex', () => {
+    it('hd-wallet', () => {
+      const provider = command.getProviderWithNetworkConfig('testnet');
+      expect(provider).toBeDefined();
+    });
+  });
+
+  describe('getAccountByIndexAndConfig', () => {
+    it('wallet', () => {
+      const wallet = command.getAccountByIndexAndConfig(0, 'default');
+      expect(wallet).toBeDefined();
+      expect(wallet.privateKey).toBeDefined();
+    });
+
+    it('hd-wallet', () => {
+      const wallet = command.getAccountByIndexAndConfig(0, 'hd-wallet');
+      expect(wallet).toBeDefined();
+      expect(wallet.privateKey).toBeDefined();
+    });
+  });
 });

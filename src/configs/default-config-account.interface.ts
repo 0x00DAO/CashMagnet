@@ -1,3 +1,7 @@
+export type WalletWithPrivateKey = {
+  privateKey: string;
+};
+
 export interface DefaultConfigAccount {
   name: string;
   type: 'privateKey' | 'hdWallet';
@@ -6,7 +10,7 @@ export interface DefaultConfigAccount {
 
 export interface DefaultConfigAccountPrivateKey extends DefaultConfigAccount {
   type: 'privateKey';
-  value: { privateKey: string }[];
+  value: WalletWithPrivateKey[];
 }
 export interface DefaultConfigAccountHDWallet extends DefaultConfigAccount {
   type: 'hdWallet';
