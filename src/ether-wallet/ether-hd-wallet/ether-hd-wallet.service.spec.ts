@@ -38,4 +38,24 @@ describe('EtherHdWalletService', () => {
       expect(wallet.address).toEqual(hdWallet.address);
     });
   });
+
+  describe('encryptHDWalletExtendedKey', () => {
+    it('success', () => {
+      const hdWallet = service.createHDWallet();
+      const extendedKeyEncrypt = service.encryptHDWalletExtendedKey(
+        hdWallet.extendedKey,
+        'password'
+      );
+
+      expect(extendedKeyEncrypt).toBeDefined();
+      expect(extendedKeyEncrypt).not.toEqual(hdWallet.extendedKey);
+
+      const wallet = service.createHDWalletFromExtendKeyWithEncrypt(
+        extendedKeyEncrypt,
+        'password'
+      );
+      expect(wallet).toBeDefined();
+      expect(wallet.address).toEqual(hdWallet.address);
+    });
+  });
 });
