@@ -144,12 +144,13 @@ describe('CommandTransferEthCommander', () => {
 
   describe('computeTransferAccountPath', () => {
     it('should compute transfer account path', async () => {
-      const accounts = command.getAccounts();
+      const accounts = [
+        command.getAccountByIndex(0),
+        command.getAccountByIndex(1),
+        command.getAccountByIndex(2),
+      ];
       const path = [0, 1, 0];
-      const accountPath = await command.computeTransferAccountPath(
-        path,
-        accounts
-      );
+      const accountPath = await command.computeTransferAccountPath(path);
       expect(accountPath).toEqual([accounts[0], accounts[1], accounts[0]]);
     });
   });

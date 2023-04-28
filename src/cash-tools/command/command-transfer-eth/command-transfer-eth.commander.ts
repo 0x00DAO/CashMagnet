@@ -15,7 +15,6 @@ import { EtherHdWalletService } from '../../../ether-wallet/ether-hd-wallet/ethe
 import { WalletService } from '../../../ether-wallet/wallet/wallet.service';
 import { ConfigService } from '../../../utils/config/config.service';
 import { ConsoleLoggerService } from '../../../utils/console-logger/console-logger.service';
-import { CommandTransferETHAccountType } from './command-transfer-eth.constants';
 //default: npx ts-node src/main.ts cash-tools transfer-eth 0.1 --from 0 --to 1
 //default.2: npx ts-node src/main.ts cash-tools transfer-eth 0.1 --transfer-path 0,1
 @SubCommand({
@@ -41,9 +40,6 @@ export class CommandTransferEthCommander extends CommandRunner {
 
   private readonly optionTransferPath: number[] = [0, 1];
 
-  private accountType: CommandTransferETHAccountType =
-    CommandTransferETHAccountType.EOA;
-
   /**
    * current transfer max gas fee
    */
@@ -52,7 +48,6 @@ export class CommandTransferEthCommander extends CommandRunner {
   async run(inputs: string[], options: Record<string, any>): Promise<void> {
     const network = options.network;
     const provider = this.getProviderWithNetworkConfig(network);
-    const accounts = this.getAccounts();
     const amount = inputs[0];
     let transferPath = this.optionTransferPath;
 
@@ -95,8 +90,7 @@ export class CommandTransferEthCommander extends CommandRunner {
 
     this.logger.log(`🍺 begin transfer eth ...`);
     const transferAccountPath = await this.computeTransferAccountPath(
-      transferPath,
-      accounts
+      transferPath
     );
     await this.transferEthByPath(amount, transferAccountPath, provider);
     this.logger.log(`🍺 transfer eth done!`);
@@ -148,18 +142,6 @@ export class CommandTransferEthCommander extends CommandRunner {
   })
   parseSilence(): boolean {
     return true;
-  }
-
-  @Option({
-    flags: '--a, --account-type <type>',
-    description:
-      'account type [0:EOA, 1:HDWallet], default is 0: EOA, when account type is HDWallet, from must be 0',
-  })
-  parseAccountType(
-    type: CommandTransferETHAccountType
-  ): CommandTransferETHAccountType {
-    this.accountType = type;
-    return type;
   }
 
   getProviderWithNetworkConfig(network?: string): ethers.providers.Provider {
@@ -250,22 +232,12 @@ export class CommandTransferEthCommander extends CommandRunner {
       null,
       `only support privateKey account`
     );
-    return account.value as { privateKey: string }[];
+    return account.value as WalletWithPrivateKey[];
   }
 
   async computeTransferAccountPath(
-    transferPath: number[],
-    accounts: { privateKey: string }[]
-  ): Promise<{ privateKey: string }[]> {
-    //check transfer path
-    for (const index of transferPath) {
-      Assertion.isTrue(
-        index < accounts.length,
-        null,
-        `transfer path index ${index} is out of range`
-      );
-    }
-
+    transferPath: number[]
+  ): Promise<WalletWithPrivateKey[]> {
     const pathValid = this.verifyTransferPath(transferPath);
     Assertion.isTrue(
       pathValid,
@@ -274,7 +246,7 @@ export class CommandTransferEthCommander extends CommandRunner {
     );
     const transferAccounts: { privateKey: string }[] = [];
     for (const index of transferPath) {
-      const account = accounts[index];
+      const account = this.getAccountByIndex(index);
       transferAccounts.push(account);
     }
     return transferAccounts;
@@ -282,7 +254,7 @@ export class CommandTransferEthCommander extends CommandRunner {
 
   async transferEthByPath(
     amount: string,
-    transferAccounts: { privateKey: string }[],
+    transferAccounts: WalletWithPrivateKey[],
     provider: ethers.providers.Provider
   ) {
     for (let i = 0; i < transferAccounts.length - 1; i++) {
