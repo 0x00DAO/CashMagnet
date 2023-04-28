@@ -11,6 +11,7 @@ import {
   WalletWithPrivateKey,
 } from '../../../configs/default-config-account.interface';
 import { Assertion } from '../../../core/exception/assertion';
+import { EtherHdWalletService } from '../../../ether-wallet/ether-hd-wallet/ether-hd-wallet.service';
 import { WalletService } from '../../../ether-wallet/wallet/wallet.service';
 import { ConfigService } from '../../../utils/config/config.service';
 import { ConsoleLoggerService } from '../../../utils/console-logger/console-logger.service';
@@ -35,9 +36,8 @@ export class CommandTransferEthCommander extends CommandRunner {
   @Inject()
   private readonly inquirer: InquirerService;
 
-  constructor() {
-    super();
-  }
+  @Inject()
+  private readonly etherHdWalletService: EtherHdWalletService;
 
   private readonly optionTransferPath: number[] = [0, 1];
 
@@ -227,28 +227,48 @@ export class CommandTransferEthCommander extends CommandRunner {
   ): WalletWithPrivateKey {
     const accountsConfig =
       this.configService.get<DefaultConfigAccount[]>('accounts');
+
     const accountConfig = accountsConfig.find((a) => a.name === configName);
     Assertion.isNotNil(accountConfig, null, `account:${configName} not found`);
 
-    if (accountConfig.type === 'privateKey') {
-      Assertion.isTrue(
-        accountConfig.value.length > index,
-        null,
-        `account:${configName} not found`
-      );
-      return accountConfig.value[index] as { privateKey: string };
-    } else if (accountConfig.type === 'hdWallet') {
-      const hdWallet = accountConfig.value as {
-        extendedKey: string;
-        password: string;
-        initialIndex: number;
-        count: number;
-      };
-      //TODO: support hdWallet
-      Assertion.isTrue(false, null, `account:${configName} not found`);
-    } else {
-      Assertion.isTrue(false, null, `account:${configName} not found`);
+    switch (accountConfig.type) {
+      case 'privateKey':
+        Assertion.isTrue(
+          accountConfig.value.length > index,
+          null,
+          `account:${configName} not found`
+        );
+        return accountConfig.value[index] as { privateKey: string };
+      case 'hdWallet':
+        const hdWalletConfig = accountConfig.value as {
+          extendedKey: string;
+          password: string;
+          initialIndex: number;
+          count: number;
+        };
+
+        const hdWallet =
+          this.etherHdWalletService.createHDWalletFromExtendKeyWithEncrypt(
+            hdWalletConfig.extendedKey,
+            hdWalletConfig.password
+          );
+
+        const hdWalletPath = this.etherHdWalletService.createHDWalletByPath(
+          hdWallet,
+          hdWalletConfig.initialIndex,
+          index
+        );
+
+        return { privateKey: hdWalletPath.wallet.privateKey };
+      default:
+        Assertion.isTrue(
+          false,
+          null,
+          `account:${configName} accountConfig.type:${accountConfig.type} not supported`
+        );
     }
+
+    return null;
   }
 
   getAccounts(): { privateKey: string }[] {

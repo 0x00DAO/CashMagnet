@@ -209,13 +209,16 @@ describe('CommandTransferEthCommander', () => {
     it('wallet', () => {
       const wallet = command.getAccountByIndexAndConfig(0, 'default');
       expect(wallet).toBeDefined();
-      expect(wallet.privateKey).toBeDefined();
+      expect(wallet.privateKey).toStrictEqual(expect.any(String));
     });
 
     it('hd-wallet', () => {
-      const wallet = command.getAccountByIndexAndConfig(0, 'hd-wallet');
+      const wallet = command.getAccountByIndexAndConfig(
+        5,
+        'Wallets-hd-wallet-1'
+      );
       expect(wallet).toBeDefined();
-      expect(wallet.privateKey).toBeDefined();
+      expect(wallet.privateKey).toStrictEqual(expect.any(String));
     });
   });
 });

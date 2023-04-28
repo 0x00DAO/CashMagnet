@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { EtherHdWalletModule } from '../../ether-wallet/ether-hd-wallet/ether-hd-wallet.module';
 import { WalletModule } from '../../ether-wallet/wallet/wallet.module';
 import { ConfigModule } from '../../utils/config/config.module';
 import { ConsoleLoggerModule } from '../../utils/console-logger/console-logger.module';
@@ -8,7 +9,12 @@ import { ContinueConfirmQuestions } from './command-transfer-eth/questions/conti
 import { CommandCommander } from './command.commander';
 
 @Module({
-  imports: [WalletModule, ConfigModule, ConsoleLoggerModule],
+  imports: [
+    WalletModule,
+    ConfigModule,
+    ConsoleLoggerModule,
+    EtherHdWalletModule,
+  ],
   providers: [
     ...CommandCommander.registerWithSubCommands(),
     CommandGetBalanceCommander,

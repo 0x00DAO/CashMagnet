@@ -52,11 +52,11 @@ export class EtherHdWalletService {
     return this.createHDWalletFromExtendKey(decrypted);
   }
 
-  async createHDWalletByPath(
+  createHDWalletByPath(
     hdWallet: HDNode,
     accountId: number,
     accountIndex: number
-  ): Promise<{ wallet: HDNode; path: string }> {
+  ): { wallet: HDNode; path: string } {
     const wallet = hdWallet;
     let path = this.getAccountBasePath(accountId, accountIndex);
     if (wallet.depth !== 0) {
