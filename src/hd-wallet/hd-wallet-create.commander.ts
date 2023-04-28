@@ -1,14 +1,10 @@
-import { Inject, Logger } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
 import { HDNode } from 'ethers/lib/utils';
 import { CommandRunner, SubCommand } from 'nest-commander';
 import { EtherHdWalletService } from '../ether-wallet/ether-hd-wallet/ether-hd-wallet.service';
-import { AesEncryption } from '../utils/encryption/aes.encryption';
 
 @SubCommand({ name: 'create', arguments: '<password>' })
 export class HdWalletCreateCommander extends CommandRunner {
-  private readonly logger: Logger = new Logger(HdWalletCreateCommander.name);
-  private readonly encrypt = new AesEncryption();
-
   @Inject()
   private readonly etherHdWalletService: EtherHdWalletService;
 

@@ -30,11 +30,22 @@ export class EtherHdWalletService {
     return extendedKeyEncrypt;
   }
 
+  decryptHDWalletExtendedKey(
+    extendedKeyEncrypt: string,
+    password: string
+  ): string {
+    const { decrypted } = this.encrypt.decryptWithSaltString(
+      extendedKeyEncrypt,
+      password
+    );
+    return decrypted;
+  }
+
   createHDWalletFromExtendKeyWithEncrypt(
     extendedKeyEncrypt: string,
     password: string
   ): HDNode {
-    const { decrypted } = this.encrypt.decryptWithSaltString(
+    const decrypted = this.decryptHDWalletExtendedKey(
       extendedKeyEncrypt,
       password
     );

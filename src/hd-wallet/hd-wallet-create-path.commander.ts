@@ -1,6 +1,7 @@
-import { Logger } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import { HDNode } from 'ethers/lib/utils';
 import { CommandRunner, Option, SubCommand } from 'nest-commander';
+import { EtherHdWalletService } from '../ether-wallet/ether-hd-wallet/ether-hd-wallet.service';
 import { AesEncryption } from '../utils/encryption/aes.encryption';
 
 @SubCommand({ name: 'create-path', arguments: '<extendedKey>' })
@@ -8,6 +9,9 @@ export class HdWalletCreatePathCommander extends CommandRunner {
   private readonly logger: Logger = new Logger(
     HdWalletCreatePathCommander.name
   );
+
+  @Inject()
+  private readonly etherHdWalletService: EtherHdWalletService;
 
   private readonly encrypt = new AesEncryption();
 
@@ -43,7 +47,10 @@ export class HdWalletCreatePathCommander extends CommandRunner {
     const accountIndex = options.accountIndex;
     const password = options.password;
 
-    const extendedKey = this.decodeExtendedKey(inputs[0], password);
+    const extendedKey = this.etherHdWalletService.decryptHDWalletExtendedKey(
+      inputs[0],
+      password
+    );
 
     //extendedKey Restore
     const { wallet, path } = await this.createPathWallet(
@@ -94,7 +101,8 @@ export class HdWalletCreatePathCommander extends CommandRunner {
     accountId: number,
     accountIndex: number
   ): Promise<{ wallet: HDNode; path: string }> {
-    const wallet = HDNode.fromExtendedKey(extendedKey);
+    const wallet =
+      this.etherHdWalletService.createHDWalletFromExtendKey(extendedKey);
     let path = this.getAccountBasePath(accountId) + '/' + accountIndex;
     if (wallet.depth !== 0) {
       path = accountIndex.toString();
