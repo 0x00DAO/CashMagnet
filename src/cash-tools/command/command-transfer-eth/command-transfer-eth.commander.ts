@@ -6,8 +6,12 @@ import {
   Option,
   SubCommand,
 } from 'nest-commander';
-import { DefaultConfigAccount } from '../../../configs/default-config-account.interface';
+import {
+  DefaultConfigAccount,
+  WalletWithPrivateKey,
+} from '../../../configs/default-config-account.interface';
 import { Assertion } from '../../../core/exception/assertion';
+import { EtherHdWalletService } from '../../../ether-wallet/ether-hd-wallet/ether-hd-wallet.service';
 import { WalletService } from '../../../ether-wallet/wallet/wallet.service';
 import { ConfigService } from '../../../utils/config/config.service';
 import { ConsoleLoggerService } from '../../../utils/console-logger/console-logger.service';
@@ -31,9 +35,8 @@ export class CommandTransferEthCommander extends CommandRunner {
   @Inject()
   private readonly inquirer: InquirerService;
 
-  constructor() {
-    super();
-  }
+  @Inject()
+  private readonly etherHdWalletService: EtherHdWalletService;
 
   private readonly optionTransferPath: number[] = [0, 1];
 
@@ -45,7 +48,6 @@ export class CommandTransferEthCommander extends CommandRunner {
   async run(inputs: string[], options: Record<string, any>): Promise<void> {
     const network = options.network;
     const provider = this.getProviderWithNetworkConfig(network);
-    const accounts = this.getAccounts();
     const amount = inputs[0];
     let transferPath = this.optionTransferPath;
 
@@ -87,7 +89,10 @@ export class CommandTransferEthCommander extends CommandRunner {
     }
 
     this.logger.log(`🍺 begin transfer eth ...`);
-    await this.transferEthByPath(amount, transferPath, accounts, provider);
+    const transferAccountPath = await this.computeTransferAccountPath(
+      transferPath
+    );
+    await this.transferEthByPath(amount, transferAccountPath, provider);
     this.logger.log(`🍺 transfer eth done!`);
   }
   @Option({
@@ -148,6 +153,73 @@ export class CommandTransferEthCommander extends CommandRunner {
     return provider;
   }
 
+  getAccountByIndex(index: number): WalletWithPrivateKey {
+    const commandConfig = this.configService.get<any>(
+      'commands.cashTools.transfer-eth'
+    );
+
+    const accountFrom = commandConfig.accountFrom ?? 'default';
+    const accountTo = commandConfig.accountTo ?? 'default';
+
+    // only index is 0, use accountFrom
+    if (index === 0) {
+      return this.getAccountByIndexAndConfig(index, accountFrom);
+    }
+
+    // index is not 0, use accountTo
+    return this.getAccountByIndexAndConfig(index, accountTo);
+  }
+
+  getAccountByIndexAndConfig(
+    index: number,
+    configName: string
+  ): WalletWithPrivateKey {
+    const accountsConfig =
+      this.configService.get<DefaultConfigAccount[]>('accounts');
+
+    const accountConfig = accountsConfig.find((a) => a.name === configName);
+    Assertion.isNotNil(accountConfig, null, `account:${configName} not found`);
+
+    switch (accountConfig.type) {
+      case 'privateKey':
+        Assertion.isTrue(
+          accountConfig.value.length > index,
+          null,
+          `account:${configName}, index:${index} not found`
+        );
+        return accountConfig.value[index] as { privateKey: string };
+      case 'hdWallet':
+        const hdWalletConfig = accountConfig.value as {
+          extendedKey: string;
+          password: string;
+          initialIndex: number;
+          count: number;
+        };
+
+        const hdWallet =
+          this.etherHdWalletService.createHDWalletFromExtendKeyWithEncrypt(
+            hdWalletConfig.extendedKey,
+            hdWalletConfig.password
+          );
+
+        const hdWalletPath = this.etherHdWalletService.createHDWalletByPath(
+          hdWallet,
+          hdWalletConfig.initialIndex,
+          index
+        );
+
+        return { privateKey: hdWalletPath.wallet.privateKey };
+      default:
+        Assertion.isTrue(
+          false,
+          null,
+          `account:${configName} accountConfig.type:${accountConfig.type} not supported`
+        );
+    }
+
+    return null;
+  }
+
   getAccounts(): { privateKey: string }[] {
     const accountConfig = this.configService.get<string>(
       'cashTools.defaultAccount'
@@ -160,40 +232,41 @@ export class CommandTransferEthCommander extends CommandRunner {
       null,
       `only support privateKey account`
     );
-    return account.value as { privateKey: string }[];
+    return account.value as WalletWithPrivateKey[];
   }
 
-  async transferEthByPath(
-    amount: string,
-    transferPath: number[],
-    accounts: { privateKey: string }[],
-    provider: ethers.providers.Provider
-  ) {
-    //check transfer path
-    for (const index of transferPath) {
-      Assertion.isTrue(
-        index < accounts.length,
-        null,
-        `transfer path index ${index} is out of range`
-      );
-    }
+  async computeTransferAccountPath(
+    transferPath: number[]
+  ): Promise<WalletWithPrivateKey[]> {
     const pathValid = this.verifyTransferPath(transferPath);
     Assertion.isTrue(
       pathValid,
       null,
       `transfer path ${transferPath} is not valid`
     );
+    const transferAccounts: { privateKey: string }[] = [];
+    for (const index of transferPath) {
+      const account = this.getAccountByIndex(index);
+      transferAccounts.push(account);
+    }
+    return transferAccounts;
+  }
 
-    for (let i = 0; i < transferPath.length - 1; i++) {
-      const logPrefix = `[${i + 1}/${transferPath.length - 1}]`;
+  async transferEthByPath(
+    amount: string,
+    transferAccounts: WalletWithPrivateKey[],
+    provider: ethers.providers.Provider
+  ) {
+    for (let i = 0; i < transferAccounts.length - 1; i++) {
+      const logPrefix = `[${i + 1}/${transferAccounts.length - 1}]`;
       this.logger.logPrefix = logPrefix;
       this.logger.log(`transfer ETH begin...`);
 
-      const fromIndex = transferPath[i];
-      const toIndex = transferPath[i + 1];
+      const fromAccount = transferAccounts[i];
+      const toAccount = transferAccounts[i + 1];
 
-      const fromPrivateKey = accounts[fromIndex].privateKey;
-      const toPrivateKey = accounts[toIndex].privateKey;
+      const fromPrivateKey = fromAccount.privateKey;
+      const toPrivateKey = toAccount.privateKey;
 
       const tx = await this.transferEth(
         fromPrivateKey,

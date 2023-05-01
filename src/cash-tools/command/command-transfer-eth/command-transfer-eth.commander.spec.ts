@@ -103,6 +103,13 @@ describe('CommandTransferEthCommander', () => {
     });
   });
 
+  describe('getAccountByIndex', () => {
+    it('should return 0', async () => {
+      const account = await command.getAccountByIndex(0);
+      expect(account).toBeDefined();
+    });
+  });
+
   describe('transferEth', () => {
     it(
       'should transfer eth',
@@ -135,6 +142,19 @@ describe('CommandTransferEthCommander', () => {
     });
   });
 
+  describe('computeTransferAccountPath', () => {
+    it('should compute transfer account path', async () => {
+      const accounts = [
+        command.getAccountByIndex(0),
+        command.getAccountByIndex(1),
+        command.getAccountByIndex(2),
+      ];
+      const path = [0, 1, 0];
+      const accountPath = await command.computeTransferAccountPath(path);
+      expect(accountPath).toEqual([accounts[0], accounts[1], accounts[0]]);
+    });
+  });
+
   describe('transferEthByPath', () => {
     beforeEach(() => {
       // command.transferEth = jest.fn().mockImplementation(() => transferTx);
@@ -145,12 +165,12 @@ describe('CommandTransferEthCommander', () => {
       const amount = '1000';
       const network = 'testnet';
       const provider = command.getProviderWithNetworkConfig(network);
-      const transferPath = [0, 1, 2, 0];
+      const accountPath = [accounts[0], accounts[1], accounts[2], accounts[0]];
 
       const transferEthSpy = jest.spyOn(command, 'transferEth');
-      await command.transferEthByPath(amount, transferPath, accounts, provider);
+      await command.transferEthByPath(amount, accountPath, provider);
 
-      expect(transferEthSpy).toHaveBeenCalledTimes(transferPath.length - 1);
+      expect(transferEthSpy).toHaveBeenCalledTimes(accountPath.length - 1);
     });
   });
 
@@ -176,6 +196,37 @@ describe('CommandTransferEthCommander', () => {
 
       const gasFee = await command.getTransferGasFee(provider);
       expect(gasFee.gt(0)).toBeTruthy();
+    });
+  });
+
+  describe('getAccountByIndex', () => {
+    it('wallet', () => {
+      const wallet = command.getAccountByIndex(0);
+      expect(wallet).toBeDefined();
+      expect(wallet.privateKey).toStrictEqual(expect.any(String));
+    });
+
+    it('hd-wallet', () => {
+      const wallet = command.getAccountByIndex(1000);
+      expect(wallet).toBeDefined();
+      expect(wallet.privateKey).toStrictEqual(expect.any(String));
+    });
+  });
+
+  describe('getAccountByIndexAndConfig', () => {
+    it('wallet', () => {
+      const wallet = command.getAccountByIndexAndConfig(0, 'default');
+      expect(wallet).toBeDefined();
+      expect(wallet.privateKey).toStrictEqual(expect.any(String));
+    });
+
+    it('hd-wallet', () => {
+      const wallet = command.getAccountByIndexAndConfig(
+        5,
+        'Wallets-hd-wallet-1'
+      );
+      expect(wallet).toBeDefined();
+      expect(wallet.privateKey).toStrictEqual(expect.any(String));
     });
   });
 });
