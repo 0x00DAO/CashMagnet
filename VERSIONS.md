@@ -34,4 +34,8 @@
 
 ### 0.1.0.20230501.1
 
-1. add global install commmand `npm install -g cash-magnet`
+1. add global install command `npm install -g cash-magnet`
+
+### 0.1.0.20230504.1
+
+1. publish version 0.0.7 to npmjs
