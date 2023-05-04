@@ -1,6 +1,6 @@
 {
   "name": "cash-magnet",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "",
   "bin": {
     "cash-magnet": "dist/main.js"
