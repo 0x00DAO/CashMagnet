@@ -43,3 +43,10 @@
 ### 0.1.0.20230504.2
 
 1. add `cash-magnet init` command
+
+## 0.1.1
+
+### 0.1.1.20230504.1
+
+1. fix `cash-magnet init` command bug
+2. add `cash-magnet Update config (config/default.yaml) in current directory?` command
