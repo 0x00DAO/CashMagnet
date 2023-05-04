@@ -15,8 +15,12 @@ export class InitOptionsQuestions {
         value: 'create-default',
       },
       {
-        name: 'Create/Update project in directory?',
+        name: 'Create/Update project config in directory?',
         value: 'create-or-update-default',
+      },
+      {
+        name: 'Update config (config/default.yaml) in current directory?',
+        value: 'update-default',
       },
     ],
   })
