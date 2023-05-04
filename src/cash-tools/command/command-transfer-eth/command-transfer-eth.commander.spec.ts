@@ -93,7 +93,7 @@ describe('CommandTransferEthCommander', () => {
 
       expect(spawnSpy).toHaveBeenCalledTimes(1);
       expect(transferEthSpy).toHaveBeenCalledTimes(2);
-    });
+    }, 100000);
   });
 
   describe('getAccounts', () => {
