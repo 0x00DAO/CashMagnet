@@ -32,6 +32,14 @@ $ cash-magnet help
 
 ```
 
+## Create a new project (Terminal)
+
+```bash
+# create a new project
+$ cash-magnet init
+
+```
+
 ## Use Case
 
 Here are some use cases that you can refer to them to use CashMagnet.

@@ -24,6 +24,14 @@ export class ConsoleLoggerService {
     }
   }
 
+  error(message?: any, ...optionalParams: any[]): void {
+    if (this.logPrefix) {
+      this.handleLog(this.logPrefix, message, ...optionalParams);
+    } else {
+      this.handleLog(message, ...optionalParams);
+    }
+  }
+
   handleLog(message?: any, ...optionalParams: any[]): void {
     console.log(message, ...optionalParams);
   }
