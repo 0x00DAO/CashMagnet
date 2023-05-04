@@ -1,14 +1,23 @@
 import { Question, QuestionSet } from 'nest-commander';
 
+const message = `Welcome to CashMagnet CLI 🎉
+Which operation do you want?
+`;
 @QuestionSet({ name: 'init-options-questions' })
 export class InitOptionsQuestions {
   @Question({
-    message: 'Which command do you want? (Y/n)',
+    message: message,
     name: 'selected',
-    type: 'list',
+    type: 'rawlist',
     choices: [
-      { name: 'Create project in empty directory', value: 'create' },
-      { name: 'Create project in current directory', value: 'create-current' },
+      {
+        name: 'Create project in directory(Empty)?',
+        value: 'create-default',
+      },
+      {
+        name: 'Create/Update project in directory?',
+        value: 'create-or-update-default',
+      },
     ],
   })
   parseSelected(val: string) {
