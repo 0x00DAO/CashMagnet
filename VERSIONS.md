@@ -31,3 +31,7 @@
 ### 0.1.0.20230428.1
 
 1. transfer tool support HD wallet
+
+### 0.1.0.20230501.1
+
+1. add global install commmand `npm install -g cash-magnet`
