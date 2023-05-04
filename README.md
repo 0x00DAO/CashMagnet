@@ -14,22 +14,21 @@ enjoy it!
 
 ```bash
 # install
-$ git clone git@github.com:0x00DAO/CashMagnet.git && cd CashMagnet
-$ npm install && npm run build
+$ npm install -g cash-magnet
 ```
 
 ### Upgrade (Terminal)
 
 ```bash
 # upgrade
-$ git pull && npm install && npm run build
+$ npm update -g cash-magnet
 ```
 
-## Running the app
+## Running the app (Terminal)
 
 ```bash
 # run
-$ node dist/main.js help
+$ cash-magnet help
 
 ```
 

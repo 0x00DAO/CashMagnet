@@ -1,6 +1,6 @@
 {
   "name": "cash-magnet",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "",
   "bin": {
     "cash-magnet": "dist/main.js"
@@ -23,7 +23,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@nestjs/common": "^8.0.0",
+    "@nestjs/common": "~8.0.0",
     "@nestjs/core": "^8.0.0",
     "@nestjs/platform-express": "^8.0.0",
     "config": "^3.3.9",
