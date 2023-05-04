@@ -8,23 +8,38 @@ CashMagnet is an AI intelligent chain transaction robot, which can help you run 
 
 enjoy it!
 
-## How to install and run
+## Part 1: How to install CashMagnet
 
-### Install (Terminal)
+## Step 0 Install
 
 ```bash
 # install
 $ npm install -g cash-magnet
 ```
 
-### Upgrade (Terminal)
+### Or upgrade
 
 ```bash
 # upgrade
 $ npm update -g cash-magnet
 ```
 
-## Running the app (Terminal)
+## Step 1: Create a new project (Terminal)
+
+```bash
+# create a new project
+$ cash-magnet init
+```
+
+**output:**
+
+```bash
+  1) Create project in directory(Empty)?
+  2) Create/Update project config in directory?
+  3) Update config (config/default.yaml) in current directory?
+```
+
+## Step 2: Running the app (Terminal)
 
 ```bash
 # run
@@ -32,15 +47,7 @@ $ cash-magnet help
 
 ```
 
-## Create a new project (Terminal)
-
-```bash
-# create a new project
-$ cash-magnet init
-
-```
-
-## Use Case
+## Part 2 Use Case
 
 Here are some use cases that you can refer to them to use CashMagnet.
 
@@ -50,18 +57,18 @@ Here are some use cases that you can refer to them to use CashMagnet.
 
 [All case in here!](wiki/UseCase.md)
 
-## Command List
+## Part 3 Command List
 
 Here are some commands that you can refer to them to use CashMagnet.
 
 Link: [Command List](wiki/CommandList.md)
 
-## RoadMap
+## Part 4 RoadMap
 
 Here are some plans that you can refer to them to use CashMagnet.
 
 Link: [RoadMap](wiki/RoadMap.md)
 
-## License
+## Part 5 License
 
 CashMagnet is [MIT licensed](LICENSE).

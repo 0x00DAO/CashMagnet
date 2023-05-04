@@ -34,6 +34,9 @@ export class InitCommander extends CommandRunner {
         await this.createWithDefaultYaml();
         await this.createWithLocalYaml();
         break;
+      case 'update-default':
+        await this.createWithDefaultYaml();
+        break;
       default:
         this.logger.error('Unknown option');
         return;
@@ -44,26 +47,48 @@ export class InitCommander extends CommandRunner {
     return;
   }
 
+  async createConfigDir() {
+    //if directory config does not exist, create it
+    const configDirExists = await fs
+      .access('config', fs.constants.F_OK)
+      .then(() => true)
+      .catch(() => false);
+
+    if (!configDirExists) {
+      await fs
+        .mkdir('config')
+        .then(() => {
+          console.log('✅ config directory has been created!');
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+  }
+
   async createWithDefaultYaml(skipOnExists: boolean = false) {
+    const filePath = 'config/default.yaml';
     //if default.yaml exists, do nothing
     const defaultYamlExists = await fs
-      .access('default.yaml', fs.constants.F_OK)
+      .access(filePath, fs.constants.F_OK)
       .then(() => true)
       .catch(() => false);
 
     if (skipOnExists && defaultYamlExists) {
-      console.log('💡 default.yaml already exists, do nothing');
+      console.log('💡 ${filePath} already exists, do nothing');
       return;
     }
+
+    await this.createConfigDir();
 
     const contents = DefaultYamlContent;
     //write default.yaml in current directory
 
     await fs
-      .writeFile('default.yaml', contents)
+      .writeFile(filePath, contents)
       .then(() => {
         console.log(
-          `✅ default.yaml has been ${
+          `✅ ${filePath} has been ${
             defaultYamlExists ? 'updated' : 'created'
           }!`
         );
@@ -74,23 +99,27 @@ export class InitCommander extends CommandRunner {
   }
 
   async createWithLocalYaml() {
+    const filePath = 'config/local.yaml';
     //if local.yaml exists, do nothing
     const localYamlExists = await fs
-      .access('local.yaml', fs.constants.F_OK)
+      .access(filePath, fs.constants.F_OK)
       .then(() => true)
       .catch(() => false);
 
     if (localYamlExists) {
-      console.log('💡 local.yaml already exists, do nothing');
+      console.log('💡 ${filePath} already exists, do nothing');
       return;
     }
 
-    //write local.yaml in current directory
+    await this.createConfigDir();
+
+    //write local.yaml in current directory eg config/local.yaml
+
     const contents = LocalYamlContent;
     await fs
-      .writeFile('local.yaml', contents)
+      .writeFile(filePath, contents)
       .then(() => {
-        console.log(`✅ local.yaml has been created`);
+        console.log(`✅ ${filePath} has been created`);
       })
       .catch((err) => {
         console.error(err);
