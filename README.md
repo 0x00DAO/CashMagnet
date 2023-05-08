@@ -1,14 +1,12 @@
 # CashMagnet - AI Assistant for Chain Transaction
 
-![GitHub license](https://img.shields.io/github/license/0x00DAO/CashMagnet)
-
-## Description
-
 CashMagnet is an AI intelligent chain transaction robot, which can help you run commands locally and earn rewards on the chain.
 
 enjoy it!
 
-## Part 1: How to install CashMagnet
+[![npm](https://img.shields.io/npm/v/level.svg)](https://www.npmjs.com/package/level) [![Node version](https://img.shields.io/node/v/level.svg)](https://www.npmjs.com/package/level) ![GitHub license](https://img.shields.io/github/license/0x00DAO/CashMagnet)
+
+## :pushpin: Part 1: How to install CashMagnet
 
 ## Step 0 Install
 
