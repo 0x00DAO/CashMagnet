@@ -2,7 +2,7 @@
 
 ## Case 1: I have too many private key wallets, I can't remember them, what should I do?
 
-### Question
+### :lollipop: Question
 
 I have too many private key wallets, I can't remember them, what should I do?
 
@@ -35,9 +35,9 @@ password: .....
 
 **Caution:**
 
-Save All the information above to a safe place, you can use it to generate a private key wallet.
+:heavy_exclamation_mark: Save All the information above to a safe place, you can use it to generate a private key wallet.
 
-**Do not lose it!!!**
+**:heavy_exclamation_mark:Do not lose it!!!**
 
 #### 2. create a sub wallet from main wallet
 
