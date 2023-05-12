@@ -22,13 +22,15 @@ export class HdWalletCreateCommander extends CommandRunner {
 
     logs.push(`create new wallet...`);
     logs.push(`### wallet ###`);
-    logs.push(`address: ${wallet.address}`);
-    logs.push(`extendedKey: ${wallet.extendedKey}`);
-    logs.push(`extendedKeyEncrypt: ${extendedKeyEncrypt}`);
-    logs.push(`mnemonic phrase: ${wallet.mnemonic.phrase}`);
-    logs.push(`privateKey: ${wallet.privateKey}`);
-    logs.push(`path: ${wallet.path}`);
-    logs.push(`password: ${password}`);
+    logs.push(`====================`);
+    logs.push(`Address:             ${wallet.address}`);
+    logs.push(`ExtendedKey:         ${wallet.extendedKey}`);
+    logs.push(`ExtendedKeyEncrypt:  ${extendedKeyEncrypt}`);
+    logs.push(`Mnemonic phrase:     ${wallet.mnemonic.phrase}`);
+    logs.push(`PrivateKey:          ${wallet.privateKey}`);
+    logs.push(`Path:                ${wallet.path}`);
+    logs.push(`Password:            ${password}`);
+    logs.push(`====================`);
     logs.push(`### done ###`);
 
     console.log(logs.join('\n'));
