@@ -50,3 +50,8 @@
 
 1. fix `cash-magnet init` command bug
 2. add `cash-magnet Update config (config/default.yaml) in current directory?` command
+
+### 0.1.2.20230512.1
+
+1. Beautify the log output format in creating wallet
+2. Update README.md
