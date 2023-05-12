@@ -6,27 +6,13 @@ enjoy it!
 
 [![npm](https://img.shields.io/npm/v/level.svg)](https://www.npmjs.com/package/level) [![Node version](https://img.shields.io/node/v/level.svg)](https://www.npmjs.com/package/level) ![GitHub license](https://img.shields.io/github/license/0x00DAO/CashMagnet)
 
-## :pushpin: Part 1: How to install CashMagnet
-
-## Step 0 Install
-
-```bash
-# install
-$ npm install -g cash-magnet
-```
-
-### Or upgrade
-
-```bash
-# upgrade
-$ npm update -g cash-magnet
-```
+## :pushpin: Part 1: How to run CashMagnet
 
 ## Step 1: Create a new project (Terminal)
 
 ```bash
 # create a new project
-$ cash-magnet init
+$ npx cash-magnet init
 ```
 
 **output:**
@@ -39,11 +25,15 @@ $ cash-magnet init
 
 ## Step 2: Running the app (Terminal)
 
+### Run in Remote (Recommended)
+
+````bash
+
 ```bash
 # run
-$ cash-magnet help
+$ npx cash-magnet help
 
-```
+````
 
 ## Part 2 Use Case
 
