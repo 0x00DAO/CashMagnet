@@ -61,22 +61,25 @@ export class HdWalletCreatePathCommander extends CommandRunner {
 
     const logs: string[] = [];
     logs.push(`create-path wallet...`);
-    logs.push(`address: ${wallet.address}`);
-    logs.push(`privateKey: ${wallet.privateKey}`);
-    logs.push(`extendedKey: ${wallet.extendedKey}`);
+    logs.push(`### wallet ###`);
+    logs.push(`====================`);
+    logs.push(`Address:             ${wallet.address}`);
+    logs.push(`PrivateKey:          ${wallet.privateKey}`);
+    logs.push(`ExtendedKey:         ${wallet.extendedKey}`);
 
     if (password) {
       logs.push(
-        `extendedKeyEncrypt: ${this.etherHdWalletService.encryptHDWalletExtendedKey(
+        `ExtendedKeyEncrypt:  ${this.etherHdWalletService.encryptHDWalletExtendedKey(
           wallet.extendedKey,
           password
         )}`
       );
     }
 
-    logs.push(`path depth: ${wallet.depth}`);
-    logs.push(`path: ${path}`);
-    logs.push(`done.`);
+    logs.push(`Path depth:          ${wallet.depth}`);
+    logs.push(`Path:                ${path}`);
+    logs.push(`====================`);
+    logs.push(`### done ###`);
 
     console.log(logs.join('\n'));
   }
